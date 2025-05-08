@@ -1,55 +1,94 @@
 
-let observaciones = [];
-let opcion = "";
 
-while (opcion !== "4") {
-  opcion = prompt(
-    " Diario de Observación - Menú\n" +
-    "1. Registrar una nueva observación\n" +
-    "2. Ver todas las observaciones\n" +
-    "3. Buscar observación por palabra clave\n" +
-    "4. Salir\n\n" +
-    "Escribe el número de la opción:"
-  );
+const observaciones = [];
 
-  if (opcion === "1") {
-    let fecha = prompt(" Ingresa la fecha (ej: 2025-04-18):");
-    let tipo = prompt(" Tipo de observación (Ej: Astronómica, Natural):");
-    let descripcion = prompt(" Describe lo que observaste:");
-    
-    observaciones.push({ fecha, tipo, descripcion });
-    alert(" Observación guardada.");
 
-  } else if (opcion === "2") {
-    if (observaciones.length === 0) {
-      alert(" No hay observaciones registradas.");
-    } else {
-      let mensaje = " Observaciones registradas:\n\n";
-      observaciones.forEach((obs, i) => {
-        mensaje += `${i + 1}. [${obs.fecha}] (${obs.tipo}) - ${obs.descripcion}\n`;
-      });
-      alert(mensaje);
-    }
+function registrar() {
+    const hora = prompt("Hora:");
+    const fecha = prompt("Fecha:");
+    const clima = prompt("Clima:");
+    const camara = prompt("Cámara usada:");
+    const telescopio = prompt("Telescopio usado:");
+    const ocular = prompt("Ocular usado:");
+    const datosFoto = prompt("Datos fotográficos:");
 
-  } else if (opcion === "3") {
-    let palabraClave = prompt(" Escribe una palabra para buscar:");
-    let resultados = observaciones.filter(obs =>
-      obs.descripcion.toLowerCase().includes(palabraClave.toLowerCase())
-    );
+    const nuevaObs = {
+        hora,
+        fecha,
+        clima,
+        camara,
+        telescopio,
+        ocular,
+        datosFoto
+    };
 
-    if (resultados.length === 0) {
-      alert(" No se encontraron coincidencias.");
-    } else {
-      let mensaje = "🔎 Resultados de búsqueda:\n\n";
-      resultados.forEach((obs, i) => {
-        mensaje += `${i + 1}. [${obs.fecha}] (${obs.tipo}) - ${obs.descripcion}\n`;
-      });
-      alert(mensaje);
-    }
-
-  } else if (opcion === "4") {
-    alert(" ¡Hasta la próxima observación!");
-  } else {
-    alert(" Opción inválida. Intenta de nuevo.");
-  }
+    observaciones.push(nuevaObs);
+    console.log(" Observación registrada.");
 }
+
+
+function mostrar() {
+    if (observaciones.length === 0) {
+        console.log(" No hay observaciones.");
+        return;
+    }
+
+    for (let i = 0; i < observaciones.length; i++) {
+        console.log(` Observación ${i + 1}:`);
+        console.log(observaciones[i]);
+    }
+}
+
+function buscar() {
+    const tipo = prompt("Buscar por telescopio:");
+    let encontrado = false;
+
+    for (let i = 0; i < observaciones.length; i++) {
+        if (observaciones[i].telescopio.includes(tipo)) {
+            console.log(` Coincidencia:`, observaciones[i]);
+            encontrado = true;
+        }
+    }
+
+    if (!encontrado) {
+        console.log("No se encontraron coincidencias.");
+    }
+}
+
+
+function menu() {
+    let salir = false;
+
+    while (!salir) {
+        const opcion = prompt(
+            "Menú de Observación:\n1. Registrar\n2. Ver\n3. Buscar\n4. Salir"
+        );
+
+        if (opcion === "1") {
+            registrar();
+        } else if (opcion === "2") {
+            mostrar();
+        } else if (opcion === "3") {
+            buscar();
+        } else if (opcion === "4") {
+            salir = true;
+            console.log(" CHAU CHAU.");
+        } else {
+            console.log(" Opción no válida.");
+        }
+    }
+}
+
+menu();
+
+        
+      
+      
+      
+
+      
+
+      
+  
+
+

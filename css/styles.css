@@ -15,7 +15,7 @@ body {
     line-height: 1.6;
 }
 
-/* HEADER */
+
 header {
     background-color: #000;
     color: #fff;
@@ -32,7 +32,6 @@ header h1 {
     text-transform: uppercase;
 }
 
-/* NAV */
 nav ul.menu {
     list-style: none;
     position: relative;
@@ -57,7 +56,6 @@ nav ul.menu a i {
     color: #f7c948;
 }
 
-/* DROPDOWN */
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -80,7 +78,7 @@ nav ul.menu a i {
     color: #ddd;
 }
 
-/* MAIN */
+
 main {
     background-color: transparent;
     padding: 2rem;
@@ -106,13 +104,11 @@ main {
     border-radius: 10px;
 }
 
-/* CARRUSEL ANIMATION */
 @keyframes scroll-carousel {
     0% { transform: translateX(0); }
     100% { transform: translateX(-300%); }
 }
 
-/* ASIDE */
 aside {
     background-color: #2c2c2c;
     padding: 1rem;
@@ -127,7 +123,6 @@ aside h2 {
     margin-bottom: 1rem;
 }
 
-/* FOOTER */
 footer {
     background-color: #000;
     color: #aaa;
