@@ -72,7 +72,7 @@ function menu() {
             buscar();
         } else if (opcion === "4") {
             salir = true;
-            console.log(" CHAU CHAU.");
+            console.log(" BUENOS CIELOS HASTA LA PROXIMA OBSERVACION.");
         } else {
             console.log(" Opción no válida.");
         }
