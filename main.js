@@ -1,94 +1,114 @@
 
 
-const observaciones = [];
+function Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto) {
+  this.hora = hora;
+  this.fecha = fecha;
+  this.clima = clima;
+  this.camara = camara;
+  this.telescopio = telescopio;
+  this.ocular = ocular;
+  this.datosFoto = datosFoto;
+}
 
+
+
+
+let observaciones = [];
+
+
+                       function guardarObservaciones() {
+  localStorage.setItem("observaciones", JSON.stringify(observaciones));
+}
+function cargarObservaciones() {
+  const datos = localStorage.getItem("observaciones");
+  if (datos) {
+    const datosParseados = JSON.parse(datos);
+    observaciones = datosParseados.map(
+      obs => new Observacion(
+        obs.hora,
+        obs.fecha,
+        obs.clima,
+        obs.camara,
+        obs.telescopio,
+        obs.ocular,
+        obs.datosFoto
+      )
+    );
+  }
+}
 
 function registrar() {
-    const hora = prompt("Hora:");
-    const fecha = prompt("Fecha:");
-    const clima = prompt("Clima:");
-    const camara = prompt("Cámara usada:");
-    const telescopio = prompt("Telescopio usado:");
-    const ocular = prompt("Ocular usado:");
-    const datosFoto = prompt("Datos fotográficos:");
+  const hora = prompt("Hora:");
+  const fecha = prompt("Fecha:");
+  const clima = prompt("Clima:");
+  const camara = prompt("Cámara usada:");
+  const telescopio = prompt("Telescopio usado:");
+  const ocular = prompt("Ocular usado:");
+  const datosFoto = prompt("Datos fotográficos:");
 
-    const nuevaObs = {
-        hora,
-        fecha,
-        clima,
-        camara,
-        telescopio,
-        ocular,
-        datosFoto
-    };
-
-    observaciones.push(nuevaObs);
-    console.log(" Observación registrada.");
+  const nuevaObs = new Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto);
+  observaciones.push(nuevaObs);
+  guardarObservaciones();
+  console.log("Observación registrada.");
 }
 
 
 function mostrar() {
-    if (observaciones.length === 0) {
-        console.log(" No hay observaciones.");
-        return;
-    }
+  if (observaciones.length === 0) {
+    console.log("No hay observaciones registradas.");
+    return;
+  }
 
-    for (let i = 0; i < observaciones.length; i++) {
-        console.log(` Observación ${i + 1}:`);
-        console.log(observaciones[i]);
-    }
+  observaciones.forEach((obs, index) => {
+    console.log(`Observación ${index + 1}:`);
+    console.log(obs);
+  });
 }
 
+
 function buscar() {
-    const tipo = prompt("Buscar por telescopio:");
-    let encontrado = false;
+  const termino = prompt("Ingrese término de búsqueda para el telescopio:");
+  const resultados = observaciones.filter(obs => obs.telescopio.includes(termino));
 
-    for (let i = 0; i < observaciones.length; i++) {
-        if (observaciones[i].telescopio.includes(tipo)) {
-            console.log(` Coincidencia:`, observaciones[i]);
-            encontrado = true;
-        }
-    }
-
-    if (!encontrado) {
-        console.log("No se encontraron coincidencias.");
-    }
+  if (resultados.length === 0) {
+    console.log("No se encontraron coincidencias.");
+  } else {
+    resultados.forEach((obs, index) => {
+      console.log(`Coincidencia ${index + 1}:`);
+      console.log(obs);
+    });
+  }
 }
 
 
 function menu() {
-    let salir = false;
+  cargarObservaciones();
+  let salir = false;
 
-    while (!salir) {
-        const opcion = prompt(
-            "Menú de Observación:\n1. Registrar\n2. Ver\n3. Buscar\n4. Salir"
-        );
+  while (!salir) {
+    const opcion = prompt(
+      "Menú de Observación:\n1. Registrar\n2. Ver\n3. Buscar\n4. Salir"
+    );
 
-        if (opcion === "1") {
-            registrar();
-        } else if (opcion === "2") {
-            mostrar();
-        } else if (opcion === "3") {
-            buscar();
-        } else if (opcion === "4") {
-            salir = true;
-            console.log(" BUENOS CIELOS HASTA LA PROXIMA OBSERVACION.");
-        } else {
-            console.log(" Opción no válida.");
-        }
+    switch (opcion) {
+      case "1":
+        registrar();
+        break;
+      case "2":
+        mostrar();
+        break;
+      case "3":
+        buscar();
+        break;
+      case "4":
+        salir = true;
+        console.log("BUENOS CIELOS HASTA LA PRÓXIMA OBSERVACIÓN.");
+        break;
+      default:
+        console.log("Opción no válida.");
     }
+  }
 }
 
+
 menu();
-
-        
-      
-      
-      
-
-      
-
-      
-  
-
-
