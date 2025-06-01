@@ -1,5 +1,4 @@
 
-
 function Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto) {
   this.hora = hora;
   this.fecha = fecha;
@@ -10,105 +9,104 @@ function Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto) 
   this.datosFoto = datosFoto;
 }
 
-
-
-
 let observaciones = [];
 
 
-                       function guardarObservaciones() {
+const form = document.getElementById("formObservacion");
+const lista = document.getElementById("listaObservaciones");
+const formBusqueda = document.getElementById("formBusqueda");
+const inputFecha = document.getElementById("fechaBusqueda");
+const resultadoBusqueda = document.getElementById("resultadoBusqueda");
+
+
+const guardarObservaciones = () => {
   localStorage.setItem("observaciones", JSON.stringify(observaciones));
-}
-function cargarObservaciones() {
-  const datos = localStorage.getItem("observaciones");
+};
+
+
+const cargarObservaciones = () => {
+  const datos = JSON.parse(localStorage.getItem("observaciones"));
   if (datos) {
-    const datosParseados = JSON.parse(datos);
-    observaciones = datosParseados.map(
+    observaciones = datos.map(
       obs => new Observacion(
-        obs.hora,
-        obs.fecha,
-        obs.clima,
-        obs.camara,
-        obs.telescopio,
-        obs.ocular,
-        obs.datosFoto
+        obs.hora, obs.fecha, obs.clima,
+        obs.camara, obs.telescopio, obs.ocular, obs.datosFoto
       )
     );
   }
-}
-
-function registrar() {
-  const hora = prompt("Hora:");
-  const fecha = prompt("Fecha:");
-  const clima = prompt("Clima:");
-  const camara = prompt("Cámara usada:");
-  const telescopio = prompt("Telescopio usado:");
-  const ocular = prompt("Ocular usado:");
-  const datosFoto = prompt("Datos fotográficos:");
-
-  const nuevaObs = new Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto);
-  observaciones.push(nuevaObs);
-  guardarObservaciones();
-  console.log("Observación registrada.");
-}
+};
 
 
-function mostrar() {
+const crearElementoObservacion = (obs) => {
+  const div = document.createElement("div");
+  div.classList.add("observacion");
+  div.innerHTML = `
+    <p><strong>Fecha:</strong> ${obs.fecha}</p>
+    <p><strong>Hora:</strong> ${obs.hora}</p>
+    <p><strong>Clima:</strong> ${obs.clima}</p>
+    <p><strong>Cámara:</strong> ${obs.camara}</p>
+    <p><strong>Telescopio:</strong> ${obs.telescopio}</p>
+    <p><strong>Ocular:</strong> ${obs.ocular}</p>
+    <p><strong>Datos Foto:</strong> ${obs.datosFoto}</p>
+  `;
+  return div;
+};
+
+
+const mostrarObservaciones = () => {
+  lista.innerHTML = "";
+
   if (observaciones.length === 0) {
-    console.log("No hay observaciones registradas.");
+    lista.innerHTML = "<p>No hay observaciones registradas.</p>";
     return;
   }
 
-  observaciones.forEach((obs, index) => {
-    console.log(`Observación ${index + 1}:`);
-    console.log(obs);
+  observaciones.forEach(obs => {
+    const elemento = crearElementoObservacion(obs);
+    lista.insertAdjacentElement("beforeend", elemento);
   });
-}
+};
 
 
-function buscar() {
-  const termino = prompt("Ingrese término de búsqueda para el telescopio:");
-  const resultados = observaciones.filter(obs => obs.telescopio.includes(termino));
+form.addEventListener("submit", e => {
+  e.preventDefault();
 
-  if (resultados.length === 0) {
-    console.log("No se encontraron coincidencias.");
-  } else {
-    resultados.forEach((obs, index) => {
-      console.log(`Coincidencia ${index + 1}:`);
-      console.log(obs);
-    });
+  const nuevaObs = new Observacion(
+    form.hora.value,
+    form.fecha.value,
+    form.clima.value,
+    form.camara.value,
+    form.telescopio.value,
+    form.ocular.value,
+    form.datosFoto.value
+  );
+
+  observaciones.push(nuevaObs);
+  guardarObservaciones();
+  mostrarObservaciones();
+  form.reset();
+});
+
+
+formBusqueda.addEventListener("submit", e => {
+  e.preventDefault();
+  const fecha = inputFecha.value;
+  const encontrados = observaciones.filter(obs => obs.fecha === fecha);
+
+  resultadoBusqueda.innerHTML = "";
+
+  if (encontrados.length === 0) {
+    resultadoBusqueda.innerHTML = "<p>No se encontraron observaciones para esa fecha.</p>";
+    return;
   }
-}
 
+  encontrados.forEach(obs => {
+    const elemento = crearElementoObservacion(obs);
+    resultadoBusqueda.insertAdjacentElement("beforeend", elemento);
+  });
+});
 
-function menu() {
+window.addEventListener("DOMContentLoaded", () => {
   cargarObservaciones();
-  let salir = false;
-
-  while (!salir) {
-    const opcion = prompt(
-      "Menú de Observación:\n1. Registrar\n2. Ver\n3. Buscar\n4. Salir"
-    );
-
-    switch (opcion) {
-      case "1":
-        registrar();
-        break;
-      case "2":
-        mostrar();
-        break;
-      case "3":
-        buscar();
-        break;
-      case "4":
-        salir = true;
-        console.log("BUENOS CIELOS HASTA LA PRÓXIMA OBSERVACIÓN.");
-        break;
-      default:
-        console.log("Opción no válida.");
-    }
-  }
-}
-
-
-menu();
+  mostrarObservaciones();
+});
