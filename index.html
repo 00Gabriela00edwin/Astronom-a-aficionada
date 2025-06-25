@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Astronomía Aficionada</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
 <body>
+
   <header>
     <h1>Astronomía Aficionada</h1>
     <nav>
@@ -30,49 +33,60 @@
         <img src="imagenes/neptuno.jpg" alt="Neptuno">
         <img src="imagenes/pilares (2).jpg" alt="Pilares de la Creación">
         <img src="imagenes/pilares.jpg" alt="Nebulosa Pilares de la Creación desde el Hubble">
-
         <img src="imagenes/galaxia.webp" alt="Galaxia lejana">
       </div>
     </section>
-    <section id="registro">
-<section id="busqueda">
-  <h2>Buscar por Fecha</h2>
-  <form id="formBusqueda">
-    <label for="fechaBusqueda">Selecciona una fecha:</label>
-    <input type="date" id="fechaBusqueda" required />
-    <button type="submit"> Buscar</button>
-  </form>
-  <div id="resultadoBusqueda"></div>
-</section>
-      <h2>Registrar Observación</h2>
 
-                      <form id="formObservacion">
-        <label>Hora: <input type="time" id="hora" required /></label><br />
-        <label>Fecha: <input type="date" id="fecha" required /></label><br />
-         <label>Clima: <input type="text" id="clima" required /></label><br />
-        <label>Cámara usada: <input type="text" id="camara" required /></label><br />
-         <label>Telescopio usado: <input type="text" id="telescopio" required /></label><br />
-        <label>Ocular usado: <input type="text" id="ocular" required /></label><br />
-        <label>Datos fotográficos: <input type="text" id="datosFoto" required /></label><br />
-            <button type="submit">Registrar</button>
+    <section id="busqueda">
+      <h2>Buscar por Fecha</h2>
+      <form id="formBusqueda">
+        <label for="fechaBusqueda">Selecciona una fecha:</label>
+        <input type="date" id="fechaBusqueda" required />
+        <button type="submit">Buscar</button>
+      </form>
+      <div id="resultadoBusqueda"></div>
+    </section>
+
+    <section id="registro">
+      <h2>Registrar Observación</h2>
+      <form id="formObservacion">
+        <p><label>Hora: <input type="time" id="hora" required /></label></p>
+        <p><label>Fecha: <input type="date" id="fecha" required /></label></p>
+        <p><label>Clima: <input type="text" id="clima" required /></label></p>
+        <p><label>Cámara usada: <input type="text" id="camara" required /></label></p>
+        <label>Telescopio usado: 
+            <select id="telescopio" required>
+             <option value="">Selecciona un telescopio</option>
+             </select>
+          </label>
+        <p><label>Ocular usado: <input type="text" id="ocular" required /></label></p>
+        <p><label>Datos fotográficos: <input type="text" id="datosFoto" required /></label></p>
+        <button type="submit">Registrar</button>
       </form>
     </section>
-    
+
     <section id="observaciones">
       <h2>Observaciones Registradas</h2>
       <div id="listaObservaciones"></div>
     </section>
   </main>
+<section id="catalogoTelescopios">
+  <h2>Catálogo de Telescopios</h2>
+  <div id="listaTelescopios"></div>
+</section>
+
+
 
   <aside>
     <h2>Carl Sagan</h2>
     <p>"En algún lugar, algo increíble está esperando a ser descubierto."</p>
+    <div id="reloj" style="font-weight: bold; font-size: 1.2em; margin-top: 10px;"></div>
   </aside>
 
   <footer>
     <p>Página desarrollada por Gaby Evelyn Edwin</p>
   </footer>
 
-  <script src="main.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

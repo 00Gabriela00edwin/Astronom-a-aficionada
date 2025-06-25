@@ -1,0 +1,5 @@
+[
+  { "nombre": "Celestron AstroMaster 70AZ", "tipo": "Refractor" },
+  { "nombre": "SkyWatcher Dobson 200/1200", "tipo": "Reflector" },
+  { "nombre": "Meade LX90", "tipo": "Catadióptrico" }
+]
