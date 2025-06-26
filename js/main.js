@@ -1,4 +1,6 @@
+
 function Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto) {
+  this.id = Date.now().toString();
   this.hora = hora;
   this.fecha = fecha;
   this.clima = clima;
@@ -10,146 +12,161 @@ function Observacion(hora, fecha, clima, camara, telescopio, ocular, datosFoto) 
 
 let observaciones = [];
 
-const form = document.getElementById("formObservacion");
-const lista = document.getElementById("listaObservaciones");
+const formObservacion = document.getElementById("formObservacion");
+const listaObservaciones = document.getElementById("listaObservaciones");
 const formBusqueda = document.getElementById("formBusqueda");
-const inputFecha = document.getElementById("fechaBusqueda");
+const inputFechaBusqueda = document.getElementById("fechaBusqueda");
 const resultadoBusqueda = document.getElementById("resultadoBusqueda");
+const selectTelescopio = document.getElementById("telescopio");
+const listaTelescopios = document.getElementById("listaTelescopios");
+function guardarObservaciones() {
+  localStorage.setItem("observaciones", JSON.stringify(observaciones));
+}
 
-setInterval(() => {
-  const now = luxon.DateTime.now().setLocale('es');
-  document.getElementById("reloj").textContent = now.toFormat("HH:mm:ss - dd LLL yyyy");
-}, 1000);
-
-const guardar = () => localStorage.setItem("observaciones", JSON.stringify(observaciones));
-
-const cargar = () => {
+function cargarObservaciones() {
   const datos = JSON.parse(localStorage.getItem("observaciones"));
   if (datos) {
-    observaciones = datos.map(o => new Observacion(...Object.values(o)));
+    observaciones = datos.map(o => Object.assign(new Observacion(), o));
   }
-};
-
-const crearObservacionHTML = (o) => {
+}
+function crearElementoObservacion(obs) {
   const div = document.createElement("div");
   div.className = "observacion";
   div.innerHTML = `
-    <p><strong>Fecha:</strong> ${o.fecha}</p>
-    <p><strong>Hora:</strong> ${o.hora}</p>
-    <p><strong>Clima:</strong> ${o.clima}</p>
-    <p><strong>Cámara:</strong> ${o.camara}</p>
-    <p><strong>Telescopio:</strong> ${o.telescopio}</p>
-    <p><strong>Ocular:</strong> ${o.ocular}</p>
-    <p><strong>Datos Foto:</strong> ${o.datosFoto}</p>
-    <button onclick="eliminarObservacion('${o.fecha}', '${o.hora}')">Eliminar</button>
+    <p><strong>Fecha:</strong> ${obs.fecha}</p>
+    <p><strong>Hora:</strong> ${obs.hora}</p>
+    <p><strong>Clima:</strong> ${obs.clima}</p>
+    <p><strong>Cámara:</strong> ${obs.camara}</p>
+    <p><strong>Telescopio:</strong> ${obs.telescopio}</p>
+    <p><strong>Ocular:</strong> ${obs.ocular}</p>
+    <p><strong>Datos Foto:</strong> ${obs.datosFoto}</p>
+    <button type="button" onclick="eliminarObservacion('${obs.id}')">Eliminar</button>
   `;
   return div;
-};
+}
 
-const mostrarTodas = () => {
-  lista.innerHTML = "";
+function mostrarObservaciones() {
+  listaObservaciones.innerHTML = "";
   if (observaciones.length === 0) {
-    lista.innerHTML = "<p>No hay observaciones registradas.</p>";
+    listaObservaciones.innerHTML = "<p>No hay observaciones registradas.</p>";
     return;
   }
-  observaciones.forEach(o => lista.appendChild(crearObservacionHTML(o)));
-};
+  observaciones.forEach(obs => listaObservaciones.appendChild(crearElementoObservacion(obs)));
+}
+function mostrarAlerta(icon, title, text, timer = 3000) {
+  Swal.fire({
+    icon,
+    title,
+    text,
+    timer,
+    showConfirmButton: false,
+  });
+}
 
-const mostrarAlerta = () => {
-  setTimeout(() => {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Observación guardada!',
-      text: 'Tu registro fue exitoso.',
-      timer: 3000,
-      showConfirmButton: false
+function eliminarObservacion(id) {
+  observaciones = observaciones.filter(obs => obs.id !== id);
+  guardarObservaciones();
+  mostrarObservaciones();
+  mostrarAlerta("info", "Observación eliminada", "El registro fue eliminado correctamente.");
+}
+
+async function cargarTelescopios() {
+  try {
+    const response = await fetch("data/telescopios.json");
+    if (!response.ok) throw new Error("Error al cargar telescopios");
+    const telescopios = await response.json();
+
+  
+    listaTelescopios.innerHTML = "";
+    telescopios.forEach(tel => {
+      const div = document.createElement("div");
+      div.className = "observacion";
+      div.innerHTML = `<p><strong>${tel.nombre}</strong> (${tel.tipo})</p>`;
+      listaTelescopios.appendChild(div);
     });
-  }, 1000);
-};
 
-form.addEventListener("submit", e => {
+    selectTelescopio.innerHTML = '<option value="">Selecciona un telescopio</option>';
+    telescopios.forEach(tel => {
+      const option = document.createElement("option");
+      option.value = tel.nombre;
+      option.textContent = `${tel.nombre} (${tel.tipo})`;
+      selectTelescopio.appendChild(option);
+    });
+  } catch (error) {
+    console.error(error);
+    alert("No se pudieron cargar los telescopios.");
+  }
+}
+
+// Luxon
+function iniciarReloj() {
+  setInterval(() => {
+    const now = luxon.DateTime.now().setLocale("es");
+    document.getElementById("reloj").textContent = now.toFormat("HH:mm:ss - dd LLL yyyy");
+  }, 1000);
+}
+
+formObservacion.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const o = new Observacion(
-    form.hora.value, form.fecha.value, form.clima.value,
-    form.camara.value, form.telescopio.value, form.ocular.value, form.datosFoto.value
+  const hora = formObservacion.hora.value;
+  const fecha = formObservacion.fecha.value;
+  if (observaciones.some(o => o.fecha === fecha && o.hora === hora)) {
+    mostrarAlerta("error", "Duplicado", "Ya existe una observación para esa fecha y hora.");
+    return;
+  }
+
+  const nuevaObs = new Observacion(
+    hora,
+    fecha,
+    formObservacion.clima.value,
+    formObservacion.camara.value,
+    formObservacion.telescopio.value,
+    formObservacion.ocular.value,
+    formObservacion.datosFoto.value
   );
 
-  observaciones.push(o);
-  guardar();
-  mostrarTodas();
-  mostrarAlerta();
-  form.reset();
+  observaciones.push(nuevaObs);
+  guardarObservaciones();
+  mostrarObservaciones();
+  mostrarAlerta("success", "¡Observación guardada!", "Tu registro fue exitoso.");
+  formObservacion.reset();
 });
 
-formBusqueda.addEventListener("submit", e => {
+formBusqueda.addEventListener("submit", (e) => {
   e.preventDefault();
-  const fecha = inputFecha.value;
-  const encontrados = observaciones.filter(o => o.fecha === fecha);
 
+  const fechaBusqueda = inputFechaBusqueda.value.trim();
+  if (!fechaBusqueda) {
+    resultadoBusqueda.innerHTML = "<p>Por favor selecciona una fecha para buscar.</p>";
+    return;
+  }
+
+  const resultados = observaciones.filter(o => o.fecha === fechaBusqueda);
   resultadoBusqueda.innerHTML = "";
 
-  if (encontrados.length === 0) {
+  if (resultados.length === 0) {
     resultadoBusqueda.innerHTML = "<p>No se encontraron observaciones para esa fecha.</p>";
     return;
   }
 
-  encontrados.forEach(o => resultadoBusqueda.appendChild(crearObservacionHTML(o)));
+  resultados.forEach(o => resultadoBusqueda.appendChild(crearElementoObservacion(o)));
 });
 
-function eliminarObservacion(fecha, hora) {
-  observaciones = observaciones.filter(o => !(o.fecha === fecha && o.hora === hora));
-  guardar();
-  mostrarTodas();
-  Swal.fire("Observación eliminada", "", "info");
-}
-
-
-async function cargarTelescopios() {
-  try {
-    let res = await fetch("data/telescopios.json");
-    if (!res.ok) throw new Error("Error al cargar telescopios");
-    let data = await res.json();
-
-    const contenedor = document.getElementById("listaTelescopios");
-    contenedor.innerHTML = "";
-    data.forEach(t => {
-      const item = document.createElement("div");
-      item.className = "telescopio";
-      item.innerHTML = `<p><strong>${t.nombre}</strong> (${t.tipo})</p>`;
-      contenedor.appendChild(item);
-    });
-
-    const selectTelescopio = document.getElementById("telescopio");
-    data.forEach(t => {
-      const option = document.createElement("option");
-      option.value = t.nombre;
-      option.textContent = `${t.nombre} (${t.tipo})`;
-      selectTelescopio.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Error en fetch:", error);
-    alert("No se pudieron cargar los telescopios");
-  } finally {
-    console.log("Finalizó la carga de telescopios");
-  }
-}
-
 window.addEventListener("DOMContentLoaded", () => {
-  cargar();
-  mostrarTodas();
+  cargarObservaciones();
+  mostrarObservaciones();
   cargarTelescopios();
- 
-
+  iniciarReloj();
 
   setTimeout(() => {
     Swal.fire({
-      title: 'BIENVENIDOS',
-      text: 'Explorá el universo desde tu navegador ',
-      icon: 'info',
-      confirmButtonText: '¡Vamos!'
+      title: "¡Bienvenidos!",
+      text: "Explorá el universo desde tu navegador",
+      icon: "info",
+      confirmButtonText: "¡Vamos!",
     });
   }, 3000);
 });
 
+window.eliminarObservacion = eliminarObservacion;
