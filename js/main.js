@@ -173,13 +173,35 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 3000);
 });
 
-
-
-
-
-
-
-
-
-
 window.eliminarObservacion = eliminarObservacion;
+
+async function obtenerClima(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=cloudcover`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("No se pudo obtener el clima");
+  const data = await res.json();
+  return data.current_weather; 
+}
+
+async function mostrarClima(lat, lon) {
+  const contenedor = document.getElementById("datosClima");
+  try {
+    const clima = await obtenerClima(lat, lon);
+    contenedor.innerHTML = `
+      <p><strong>Temperatura:</strong> ${clima.temperature} °C</p>
+      <p><strong>Velocidad del viento:</strong> ${clima.windspeed} km/h</p>
+      <p><strong>Dirección del viento:</strong> ${clima.winddirection}°</p>
+      <p><strong>Hora de la medición:</strong> ${clima.time}</p>
+    `;
+  } catch (error) {
+    contenedor.textContent = "Error al obtener datos del clima.";
+    console.error(error);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  mostrarClima(-34.6, -58.4);
+});
+
+
