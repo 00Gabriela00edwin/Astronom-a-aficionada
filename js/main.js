@@ -153,6 +153,7 @@ formBusqueda.addEventListener("submit", (e) => {
   resultados.forEach(o => resultadoBusqueda.appendChild(crearElementoObservacion(o)));
 });
 
+
 window.addEventListener("DOMContentLoaded", () => {
   cargarObservaciones();
   mostrarObservaciones();
@@ -163,10 +164,22 @@ window.addEventListener("DOMContentLoaded", () => {
     Swal.fire({
       title: "¡Bienvenidos!",
       text: "Explorá el universo desde tu navegador",
-      icon: "info",
+      background: "#121212",
+      color: "#e0e0e0",
+      confirmButtonColor: "#f7c948",
       confirmButtonText: "¡Vamos!",
+      customClass: { popup: "mi-alerta" }
     });
   }, 3000);
 });
+
+
+
+
+
+
+
+
+
 
 window.eliminarObservacion = eliminarObservacion;

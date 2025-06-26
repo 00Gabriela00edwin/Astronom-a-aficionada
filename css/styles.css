@@ -162,6 +162,11 @@ button {
 button:hover {
   background-color: #e6b800;
 }
+button:disabled {
+  background-color: #888;
+  color: #222;
+  cursor: not-allowed;
+}
 
 .observacion {
   background-color: #222;
@@ -191,6 +196,68 @@ footer {
   border-top: 1px solid #333;
   font-size: 0.9rem;
 }
+select {
+  width: 100%;
+  padding: 0.7rem;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 8px;
+}
+
+input, select {
+  background-color: #2a2a2a;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 0.7rem;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus, select:focus {
+  border-color: #f7c948;
+  box-shadow: 0 0 8px #f7c948;
+  background-color: #3a3a3a;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f7c948;
+  border-radius: 10px;
+}
+
+.swal2-popup.mi-alerta {
+  font-family: 'Orbitron', sans-serif;
+  background-color: #121212 !important;
+  border: 2px solid #f7c948;
+  color: #e0e0e0 !important;
+  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+}
+
+.swal2-title {
+   font-family: 'Orbitron', sans-serif;
+  background-color: #121212 !important;
+  border: 2px solid #f7c948;
+  color: #e0e0e0 !important;
+  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+}
+
+.swal2-html-container {
+   font-family: 'Orbitron', sans-serif;
+  background-color: #121212 !important;
+  border: 2px solid #f7c948;
+  color: #e0e0e0 !important;
+  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+}
+
 
 @media (max-width: 768px) {
   header {
