@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useModoNocturno } from "../ModoNocturno.jsx";
 
-function crearParticulas() {
-  const estrellas = Array.from({ length: 150 }, () => ({
+function crearParticulas(movil) {
+  const estrellas = Array.from({ length: movil ? 65 : 150 }, () => ({
     x: (Math.random() - 0.5) * 3.2,
     y: (Math.random() - 0.5) * 2.2,
     z: 0.8 + Math.random() * 1.8,
     radio: 0.5 + Math.random() * 1.15,
     brillo: 0.3 + Math.random() * 0.55,
   }));
-  const nebulosa = Array.from({ length: 36 }, () => ({
+  const nebulosa = Array.from({ length: movil ? 12 : 36 }, () => ({
     x: 0.45 + (Math.random() - 0.5) * 1.5,
     y: (Math.random() - 0.5) * 1.3,
     z: 1.2 + Math.random() * 1.2,
@@ -22,7 +22,8 @@ function crearParticulas() {
 
 export default function StarfieldBackground({ puntero, movimientoReducido }) {
   const canvasRef = useRef(null);
-  const particulas = useMemo(crearParticulas, []);
+  const movil = useMemo(() => window.matchMedia("(max-width: 720px)").matches, []);
+  const particulas = useMemo(() => crearParticulas(movil), [movil]);
   const { modoNocturno } = useModoNocturno();
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function StarfieldBackground({ puntero, movimientoReducido }) {
     let fotograma = null;
     let tiempo = 0;
     let anterior = null;
+    let visible = false;
     let desplazamiento = { x: 0, y: 0 };
 
     function dibujar() {
@@ -82,6 +84,10 @@ export default function StarfieldBackground({ puntero, movimientoReducido }) {
     }
 
     function animar(ahora) {
+      if (anterior !== null && ahora - anterior < 1000 / 30) {
+        fotograma = requestAnimationFrame(animar);
+        return;
+      }
       const delta = anterior === null ? 0 : Math.min(ahora - anterior, 50);
       anterior = ahora;
       tiempo += delta;
@@ -96,7 +102,7 @@ export default function StarfieldBackground({ puntero, movimientoReducido }) {
       const rect = canvas.getBoundingClientRect();
       ancho = rect.width;
       alto = rect.height;
-      escala = Math.min(window.devicePixelRatio || 1, 2);
+      escala = Math.min(window.devicePixelRatio || 1, movil ? 1 : 2);
       canvas.width = Math.round(ancho * escala);
       canvas.height = Math.round(alto * escala);
       contexto.setTransform(escala, 0, 0, escala, 0, 0);
@@ -107,24 +113,30 @@ export default function StarfieldBackground({ puntero, movimientoReducido }) {
     resizeObserver.observe(canvas);
     actualizarTamano();
 
-    const intersectionObserver = new IntersectionObserver(([entrada]) => {
-      const visible = entrada.isIntersecting;
-      if (visible && !movimientoReducido && fotograma === null) {
+    function actualizarAnimacion() {
+      if (visible && !document.hidden && !movimientoReducido && fotograma === null) {
         anterior = null;
         fotograma = requestAnimationFrame(animar);
-      } else if (!visible && fotograma !== null) {
+      } else if ((!visible || document.hidden) && fotograma !== null) {
         cancelAnimationFrame(fotograma);
         fotograma = null;
       }
+    }
+
+    const intersectionObserver = new IntersectionObserver(([entrada]) => {
+      visible = entrada.isIntersecting;
+      actualizarAnimacion();
     });
     intersectionObserver.observe(canvas);
+    document.addEventListener("visibilitychange", actualizarAnimacion);
 
     return () => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", actualizarAnimacion);
       if (fotograma !== null) cancelAnimationFrame(fotograma);
     };
-  }, [modoNocturno, movimientoReducido, particulas, puntero]);
+  }, [modoNocturno, movimientoReducido, movil, particulas, puntero]);
 
   return <canvas ref={canvasRef} className="starfield" aria-hidden="true" />;
 }

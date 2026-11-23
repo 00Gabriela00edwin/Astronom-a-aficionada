@@ -30,7 +30,19 @@ export function evaluarViento(velocidad) {
   if (!Number.isFinite(velocidad) || velocidad < 0) {
     throw new TypeError("Se necesita una velocidad de viento válida.");
   }
+
   if (velocidad <= 15) return "Óptimo";
   if (velocidad <= 30) return "Moderado";
   return "Poco favorable";
+}
+
+export function evaluarCielo(viento, nubosidad, precipitacion) {
+  const vientoEvaluado = evaluarViento(viento);
+  if (!Number.isFinite(nubosidad) || nubosidad < 0 || nubosidad > 100 ||
+      !Number.isFinite(precipitacion) || precipitacion < 0) {
+    throw new TypeError("Se necesita nubosidad y precipitación válidas.");
+  }
+  if (precipitacion > 0 || nubosidad > 60 || vientoEvaluado === "Poco favorable") return "Poco favorable";
+  if (nubosidad > 25 || vientoEvaluado === "Moderado") return "Moderado";
+  return "Óptimo";
 }

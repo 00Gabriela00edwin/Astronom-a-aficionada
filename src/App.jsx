@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MotionConfig } from "framer-motion";
-import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import telescopiosUrl from "../data/telescopios.json?url";
 import { Aside, Footer, Header } from "./components/Layout.jsx";
@@ -8,32 +7,50 @@ import Hero from "./components/Hero.jsx";
 import Clima from "./components/Clima.jsx";
 import CalculadoraAumentos from "./components/CalculadoraAumentos.jsx";
 import useClima from "./hooks/useClima.js";
+import Ubicacion from "./components/Ubicacion.jsx";
+import SectionHeading from "./components/SectionHeading.jsx";
+import { CalendarDays } from "lucide-react";
+import { combinarRespaldo } from "./utils/respaldo.js";
 import { Busqueda, CatalogoTelescopios, ObservacionesRegistradas, RegistroObservacion } from "./components/Observaciones.jsx";
 
+const UBICACION_INICIAL = { nombre: "Buenos Aires, Argentina", latitud: -34.6, longitud: -58.4, zona: "America/Argentina/Buenos_Aires" };
+
 function mostrarAlerta(icon, title, text, timer = 3000) {
-  Swal.fire({ icon, title, text, timer, showConfirmButton: false });
+  import("sweetalert2")
+    .then(({ default: Swal }) => Swal.fire({ icon, title, text, timer, showConfirmButton: false }))
+    .catch((error) => {
+      console.error("No se pudo mostrar la notificación:", error);
+      alert(`No se pudo mostrar la notificación visual. ${title}: ${text}`);
+    });
 }
 
 function cargarObservaciones() {
   try {
     const datos = localStorage.getItem("observaciones");
-    if (!datos) return [];
+    if (!datos) return { datos: [], error: false };
     const observaciones = JSON.parse(datos);
     if (!Array.isArray(observaciones)) throw new Error("Las observaciones guardadas no son una lista");
-    return observaciones;
+    return { datos: observaciones, error: false };
   } catch (error) {
     console.error("No se pudieron cargar las observaciones:", error);
-    alert("No se pudieron cargar las observaciones guardadas.");
-    return [];
+    return { datos: [], error: true };
   }
 }
 
 export default function App() {
-  const [observaciones, setObservaciones] = useState(cargarObservaciones);
+  const [cargaInicial] = useState(cargarObservaciones);
+  const [observaciones, setObservaciones] = useState(cargaInicial.datos);
+  const observacionesActuales = useRef(cargaInicial.datos);
   const [telescopios, setTelescopios] = useState([]);
   const [estadoCatalogo, setEstadoCatalogo] = useState("cargando");
   const [fechaFiltro, setFechaFiltro] = useState("");
-  const { clima, cargando, error, actualizarClima } = useClima();
+  const [ubicacion, setUbicacion] = useState(UBICACION_INICIAL);
+  const [planificadorAbierto, setPlanificadorAbierto] = useState(false);
+  const [Planificador, setPlanificador] = useState(null);
+  const [cargandoPlanificador, setCargandoPlanificador] = useState(false);
+  const [errorPlanificador, setErrorPlanificador] = useState(false);
+  const { clima, cargando, error, actualizarClima } = useClima(ubicacion);
+  const climaUbicacion = clima?.latitud === ubicacion.latitud && clima?.longitud === ubicacion.longitud ? clima : null;
   const observacionesFiltradas = fechaFiltro
     ? observaciones.filter((observacion) => observacion.fecha === fechaFiltro)
     : observaciones;
@@ -66,8 +83,13 @@ export default function App() {
   }, []);
 
   function guardarObservaciones(nuevasObservaciones) {
+    if (cargaInicial.error) {
+      alert("No se pueden guardar observaciones porque no se pudieron leer los datos existentes.");
+      return false;
+    }
     try {
       localStorage.setItem("observaciones", JSON.stringify(nuevasObservaciones));
+      observacionesActuales.current = nuevasObservaciones;
       setObservaciones(nuevasObservaciones);
       return true;
     } catch (error) {
@@ -94,16 +116,56 @@ export default function App() {
     mostrarAlerta("info", "Observación eliminada", "El registro fue eliminado correctamente.");
   }
 
+  function importarObservaciones(respaldo) {
+    const resultado = combinarRespaldo(observacionesActuales.current, respaldo);
+    if (!guardarObservaciones(resultado.observaciones)) return null;
+    return resultado;
+  }
+
+  async function alternarPlanificador() {
+    if (planificadorAbierto) {
+      setPlanificadorAbierto(false);
+      return;
+    }
+    setPlanificadorAbierto(true);
+    if (Planificador || cargandoPlanificador) return;
+    setCargandoPlanificador(true);
+    setErrorPlanificador(false);
+    try {
+      const modulo = await import("./components/Planificador.jsx");
+      setPlanificador(() => modulo.default);
+    } catch (error) {
+      console.error("No se pudo cargar el planificador:", error);
+      setErrorPlanificador(true);
+    } finally {
+      setCargandoPlanificador(false);
+    }
+  }
+
   return (
     <MotionConfig reducedMotion="user">
       <Header />
       <main>
         <Hero />
         <div id="dashboard" className="dashboard">
-          <Clima clima={clima} cargando={cargando} error={error} />
+          <Ubicacion ubicacion={ubicacion} onCambiar={setUbicacion} />
+          <Clima clima={climaUbicacion} cargando={cargando} error={error} ubicacion={ubicacion} />
           <Busqueda fechaFiltro={fechaFiltro} onBuscar={setFechaFiltro} cantidad={observacionesFiltradas.length} />
-          <RegistroObservacion telescopios={telescopios} onRegistrar={registrarObservacion} actualizarClima={actualizarClima} cargandoClima={cargando} errorClima={error} />
-          <ObservacionesRegistradas observaciones={observacionesFiltradas} fechaFiltro={fechaFiltro} onEliminar={eliminarObservacion} />
+          {cargaInicial.error && <p className="storage-warning" role="alert">No se pudieron leer las observaciones guardadas. Se desactivó la escritura para evitar sobrescribirlas.</p>}
+          <RegistroObservacion telescopios={telescopios} onRegistrar={registrarObservacion} actualizarClima={actualizarClima} cargandoClima={cargando} errorClima={error} ubicacion={ubicacion} />
+          <ObservacionesRegistradas observaciones={observacionesFiltradas} todasObservaciones={observaciones} fechaFiltro={fechaFiltro} onEliminar={eliminarObservacion} onImportar={importarObservaciones} errorCarga={cargaInicial.error} />
+          <section id="planificador" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
+            <SectionHeading icon={CalendarDays} eyebrow="PREPARA TU NOCHE">Planificador de observación</SectionHeading>
+            <button type="button" className="autofill-button" aria-expanded={planificadorAbierto} onClick={alternarPlanificador}>
+              {planificadorAbierto ? "Cerrar planificador" : "Abrir planificador"}
+            </button>
+            {planificadorAbierto && (
+              errorPlanificador ? <p className="helper-text" role="alert">No se pudo cargar el planificador. Ciérralo y ábrelo para reintentar.</p>
+                : cargandoPlanificador || !Planificador ? <p className="helper-text" role="status">Cargando planificador…</p>
+                  : ubicacion.zona || climaUbicacion?.zona ? <Planificador ubicacion={ubicacion} zona={ubicacion.zona || climaUbicacion.zona} />
+                    : <p className="helper-text" role="status">Esperando la zona horaria de la ubicación. Si falla, reintenta la consulta del clima.</p>
+            )}
+          </section>
           <CalculadoraAumentos telescopios={telescopios} estadoCatalogo={estadoCatalogo} />
           <CatalogoTelescopios telescopios={telescopios} />
         </div>

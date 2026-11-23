@@ -34,7 +34,7 @@ body {
 body:has(.night-mode) {
   --background: #000;
   --text: #dd5555;
-  --muted: #a44444;
+  --muted: #c15a5a;
   --accent: #ff2a2a;
   --accent-soft: rgba(255, 42, 42, 0.08);
   --accent-border: rgba(255, 42, 42, 0.24);
@@ -243,7 +243,7 @@ main {
   border-color: var(--border);
 }
 
-.carousel, .dashboard, #climaAstronomico, #busqueda, #registro, #observaciones, #calculadoraAumentos, #catalogoTelescopios {
+.carousel, .dashboard, #ubicacion, #climaAstronomico, #busqueda, #registro, #observaciones, #planificador, #calculadoraAumentos, #catalogoTelescopios, .storage-warning {
   grid-column: 1 / -1;
 }
 
@@ -492,6 +492,153 @@ main {
 
 .weather-time {
   grid-column: 1 / -1;
+}
+
+.helper-text {
+  margin: 0.75rem 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.helper-text strong {
+  color: var(--text);
+}
+
+.location-form, .backup-actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.location-form > div {
+  flex: 1 1 230px;
+}
+
+.location-form button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.location-results {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.location-results button {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  color: var(--text);
+  text-align: left;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.location-results button:hover {
+  border-color: var(--accent);
+}
+
+.forecast-tile {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.forecast-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.forecast-hour {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+
+.forecast-hour strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.backup-actions {
+  margin-bottom: 0.5rem;
+}
+
+.backup-import {
+  position: relative;
+  cursor: pointer;
+}
+
+.backup-import:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.backup-import input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.backup-import:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.planner-content {
+  margin-top: 1rem;
+}
+
+.planner-content input {
+  max-width: 250px;
+}
+
+.planner-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.planner-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.planner-table th, .planner-table td {
+  padding: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.planner-table thead {
+  color: var(--muted);
+}
+
+.storage-warning {
+  padding: 0.8rem 1rem;
+  color: var(--text);
+  background: var(--menu);
+  border: 1px solid var(--accent);
+}
+
+.app > .storage-warning {
+  width: min(100% - 2rem, 1200px);
+  margin: 6rem auto 0;
 }
 
 .observacion {
@@ -1059,7 +1206,7 @@ footer span {
     padding-top: 5.25rem;
   }
 
-  .carousel, .dashboard, #climaAstronomico, #busqueda, #registro, #observaciones, #calculadoraAumentos, #catalogoTelescopios {
+  .carousel, .dashboard, #ubicacion, #climaAstronomico, #busqueda, #registro, #observaciones, #planificador, #calculadoraAumentos, #catalogoTelescopios, .storage-warning {
     grid-column: auto;
   }
 
@@ -1081,10 +1228,6 @@ footer span {
 
   .weather-tile {
     grid-column: span 1;
-  }
-
-  .weather-tile:nth-child(3) {
-    grid-column: 1 / -1;
   }
 
   .sky-tile, .moon-tile, .weather-message {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { CloudMoon, Compass, Gauge, Moon, Thermometer, Wind } from "lucide-react";
-import { calcularFaseLunar, evaluarViento } from "../utils/astronomia.js";
+import { CloudMoon, CloudRain, Cloud, Compass, Gauge, Moon, Thermometer, Wind } from "lucide-react";
+import { calcularFaseLunar, evaluarCielo } from "../utils/astronomia.js";
 import SectionHeading from "./SectionHeading.jsx";
 
 function DatoClima({ icon: Icon, label, value }) {
@@ -13,7 +13,7 @@ function DatoClima({ icon: Icon, label, value }) {
   );
 }
 
-function FaseLunar() {
+function FaseLunar({ zona }) {
   const [fecha, setFecha] = useState(() => new Date());
 
   useEffect(() => {
@@ -36,7 +36,7 @@ function FaseLunar() {
         <span className="tile-label"><Moon size={16} aria-hidden="true" /> FASE LUNAR ACTUAL</span>
         <h3>{fase.nombre}</h3>
         <p>Iluminación aproximada: {fase.iluminacion} %</p>
-        <small>{fecha.toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}</small>
+        <small>{fecha.toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric", ...(zona ? { timeZone: zona } : {}) })}</small>
       </div>
       <svg viewBox="0 0 100 100" className="moon-graphic" role="img" aria-label={`${fase.nombre}, ${fase.iluminacion} % iluminada`}>
         <circle cx="50" cy="50" r="40" className="moon-shadow" />
@@ -47,7 +47,7 @@ function FaseLunar() {
   );
 }
 
-export default function Clima({ clima, cargando, error }) {
+export default function Clima({ clima, cargando, error, ubicacion }) {
   return (
     <section id="climaAstronomico" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
       <SectionHeading icon={CloudMoon} eyebrow="CONDICIONES DE OBSERVACIÓN">Clima Actual</SectionHeading>
@@ -58,15 +58,31 @@ export default function Clima({ clima, cargando, error }) {
               <DatoClima icon={Thermometer} label="Temperatura" value={`${clima.temperature} °C`} />
               <DatoClima icon={Wind} label="Velocidad del viento" value={`${clima.windspeed} km/h`} />
               <DatoClima icon={Compass} label="Dirección del viento" value={`${clima.winddirection}°`} />
+              <DatoClima icon={Cloud} label="Nubosidad" value={`${clima.nubosidad} %`} />
+              <DatoClima icon={CloudRain} label="Precipitación actual" value={`${clima.precipitacion} mm`} />
               <div className="sky-tile">
                 <span className="tile-label"><Gauge size={16} aria-hidden="true" /> ESTADO DEL CIELO PARA OBSERVAR</span>
-                <strong>{evaluarViento(clima.windspeed)}</strong>
-                <p>Estimación basada solo en el viento; no considera nubosidad.</p>
+                <strong>{evaluarCielo(clima.windspeed, clima.nubosidad, clima.precipitacion)}</strong>
+                <p>Estimación orientativa basada en viento, nubosidad y precipitación. No considera turbulencia atmosférica ni garantiza visibilidad.</p>
+              </div>
+              <div className="forecast-tile">
+                <span className="tile-label">PRÓXIMAS HORAS · HORA LOCAL</span>
+                <div className="forecast-list">
+                  {clima.pronostico.map((hora) => (
+                    <div className="forecast-hour" key={hora.hora}>
+                      <strong>{hora.etiqueta}</strong>
+                      <span>Nubes {hora.nubosidad} %</span>
+                      <span>Prob. lluvia {hora.probabilidad} %</span>
+                      <span>Lluvia {hora.precipitacion} mm</span>
+                      <span>Viento {hora.viento} km/h</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           ) : <p className="weather-message" role="status">Cargando datos...</p>}
-        <FaseLunar />
-        {clima && !error && <p className="weather-time">{cargando ? "Actualizando medición…" : `Medición en Buenos Aires: ${clima.time}`}</p>}
+        <FaseLunar zona={ubicacion.zona || clima?.zona} />
+        {clima && !error && <p className="weather-time">{cargando ? "Actualizando medición…" : `Datos en ${ubicacion.nombre}: ${clima.time} (${clima.zona})`}</p>}
       </div>
     </section>
   );

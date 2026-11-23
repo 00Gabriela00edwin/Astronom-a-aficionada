@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularFaseLunar, evaluarViento } from "../src/utils/astronomia.js";
+import { calcularFaseLunar, evaluarCielo, evaluarViento } from "../src/utils/astronomia.js";
 
 test("calcula las fases principales con fechas conocidas", () => {
   const casos = [
@@ -30,4 +30,15 @@ test("clasifica el viento en los límites definidos", () => {
   assert.equal(evaluarViento(30.1), "Poco favorable");
   assert.throws(() => evaluarViento(-1), TypeError);
   assert.throws(() => evaluarViento(NaN), TypeError);
+});
+
+test("evalúa el cielo considerando nubosidad, precipitación y viento", () => {
+  assert.equal(evaluarCielo(15, 25, 0), "Óptimo");
+  assert.equal(evaluarCielo(15, 26, 0), "Moderado");
+  assert.equal(evaluarCielo(15, 60, 0), "Moderado");
+  assert.equal(evaluarCielo(15, 61, 0), "Poco favorable");
+  assert.equal(evaluarCielo(0, 0, 0.1), "Poco favorable");
+  assert.equal(evaluarCielo(31, 0, 0), "Poco favorable");
+  assert.throws(() => evaluarCielo(0, 101, 0), TypeError);
+  assert.throws(() => evaluarCielo(0, 0, -1), TypeError);
 });

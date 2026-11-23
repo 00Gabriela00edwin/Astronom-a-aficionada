@@ -12,7 +12,7 @@ const enlacesGaleria = [
 ];
 
 export function Header() {
-  const { modoNocturno, setModoNocturno } = useModoNocturno();
+  const { modoNocturno, alternarModo } = useModoNocturno();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [galeriaAbierta, setGaleriaAbierta] = useState(false);
   const botonGaleria = useRef(null);
@@ -87,7 +87,7 @@ export function Header() {
             className="night-toggle"
             aria-label="Modo visión nocturna"
             aria-pressed={modoNocturno}
-            onClick={() => setModoNocturno((activo) => !activo)}
+            onClick={alternarModo}
           >
             {modoNocturno ? <Eye size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
             <span>Visión nocturna</span>

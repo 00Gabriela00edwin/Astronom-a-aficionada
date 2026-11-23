@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DateTime } from "luxon";
-import { BookOpen, ClipboardList, CloudSun, Search, Telescope, Trash2 } from "lucide-react";
+import { BookOpen, ClipboardList, CloudSun, Download, Search, Telescope, Trash2, Upload } from "lucide-react";
 import SectionHeading from "./SectionHeading.jsx";
 
 const formularioVacio = {
@@ -69,7 +69,7 @@ export function Busqueda({ fechaFiltro, onBuscar, cantidad }) {
   );
 }
 
-export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima, cargandoClima, errorClima }) {
+export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima, cargandoClima, errorClima, ubicacion }) {
   const [formulario, setFormulario] = useState(formularioVacio);
   const [errorAutocompletar, setErrorAutocompletar] = useState(false);
 
@@ -103,7 +103,7 @@ export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima,
       <div className="autofill-panel">
         <div>
           <strong>Una instantánea de tu cielo</strong>
-          <p>Hora local y clima actual de Buenos Aires. Puedes editar ambos campos.</p>
+          <p>Hora local del dispositivo y clima actual de {ubicacion.nombre}. Puedes editar ambos campos.</p>
         </div>
         <button type="button" className="autofill-button" onClick={autocompletar} disabled={cargandoClima}>
           <CloudSun size={18} aria-hidden="true" /> {cargandoClima ? "Actualizando clima..." : "Autocompletar clima y hora actual"}
@@ -133,12 +133,57 @@ export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima,
   );
 }
 
-export function ObservacionesRegistradas({ observaciones, fechaFiltro, onEliminar }) {
+export function ObservacionesRegistradas({ observaciones, todasObservaciones, fechaFiltro, onEliminar, onImportar, errorCarga }) {
   const movimientoReducido = useReducedMotion();
+  const [urlRespaldo, setUrlRespaldo] = useState(null);
+  const [mensajeRespaldo, setMensajeRespaldo] = useState("");
+  const enlace = useRef(null);
+
+  useEffect(() => {
+    if (!urlRespaldo) return undefined;
+    enlace.current.click();
+    return () => URL.revokeObjectURL(urlRespaldo);
+  }, [urlRespaldo]);
+
+  function exportar() {
+    try {
+      const datos = JSON.stringify({ version: 1, observaciones: todasObservaciones }, null, 2);
+      setUrlRespaldo(URL.createObjectURL(new Blob([datos], { type: "application/json" })));
+      setMensajeRespaldo("Respaldo preparado para descargar.");
+    } catch (error) {
+      console.error("No se pudo exportar el respaldo:", error);
+      setMensajeRespaldo("No se pudo preparar el respaldo.");
+    }
+  }
+
+  async function importar(event) {
+    const archivo = event.target.files?.[0];
+    event.target.value = "";
+    if (!archivo) return;
+    try {
+      const resultado = onImportar(JSON.parse(await archivo.text()));
+      setMensajeRespaldo(resultado
+        ? `${resultado.agregadas} observaciones importadas; ${resultado.omitidas} duplicadas omitidas.`
+        : "No se pudo guardar el respaldo importado.");
+    } catch (error) {
+      console.error("No se pudo importar el respaldo:", error);
+      setMensajeRespaldo(error instanceof SyntaxError ? "El archivo no contiene JSON válido." : error.message);
+    }
+  }
 
   return (
     <section id="observaciones" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
       <SectionHeading icon={ClipboardList} eyebrow="TU BITÁCORA">Observaciones Registradas</SectionHeading>
+      <div className="backup-actions">
+        <button type="button" className="autofill-button" onClick={exportar} disabled={errorCarga}><Download size={16} aria-hidden="true" /> Exportar respaldo</button>
+        <label className="autofill-button backup-import">
+          <Upload size={16} aria-hidden="true" /> Importar respaldo
+          <input type="file" accept="application/json,.json" onChange={importar} disabled={errorCarga} />
+        </label>
+        <a ref={enlace} href={urlRespaldo || undefined} download="observaciones-astronomia.json" hidden>Descargar respaldo</a>
+      </div>
+      <p className="helper-text">El respaldo incluye todas las observaciones, incluso si hay un filtro activo. Al importar se combinan sin reemplazar registros.</p>
+      {mensajeRespaldo && <p className="helper-text" role="status">{mensajeRespaldo}</p>}
       <div id="listaObservaciones">
         <AnimatePresence initial={false}>
           {observaciones.map((observacion) => (

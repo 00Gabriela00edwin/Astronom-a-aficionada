@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { procesarClima } from "../utils/clima.js";
 
-const URL_CLIMA = "https://api.open-meteo.com/v1/forecast?latitude=-34.6&longitude=-58.4&current_weather=true&hourly=cloudcover&timezone=auto";
-
-export default function useClima() {
+export default function useClima(ubicacion) {
   const [clima, setClima] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
@@ -16,18 +15,22 @@ export default function useClima() {
     setError(false);
 
     try {
-      const response = await fetch(URL_CLIMA, { signal: solicitud.signal });
+      const params = new URLSearchParams({
+        latitude: String(ubicacion.latitud),
+        longitude: String(ubicacion.longitud),
+        current: "temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation",
+        hourly: "cloud_cover,precipitation_probability,precipitation,wind_speed_10m",
+        wind_speed_unit: "kmh",
+        forecast_days: "2",
+        timezone: "auto",
+        timeformat: "unixtime",
+      });
+      const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, { signal: solicitud.signal });
       if (!response.ok) throw new Error("No se pudo obtener el clima");
-      const data = await response.json();
-      const actual = data.current_weather;
-      if (!actual || !Number.isFinite(actual.temperature) ||
-          !Number.isFinite(actual.windspeed) || actual.windspeed < 0 ||
-          !Number.isFinite(actual.winddirection) || typeof actual.time !== "string") {
-        throw new Error("La respuesta no contiene datos válidos del clima actual");
-      }
+      const climaActual = procesarClima(await response.json(), ubicacion);
       if (solicitud.signal.aborted) return null;
-      setClima(actual);
-      return actual;
+      setClima(climaActual);
+      return climaActual;
     } catch (error) {
       if (solicitud.signal.aborted) return null;
       console.error(error);
@@ -40,9 +43,10 @@ export default function useClima() {
         controlador.current = null;
       }
     }
-  }, []);
+  }, [ubicacion.latitud, ubicacion.longitud]);
 
   useEffect(() => {
+    setClima(null);
     actualizarClima();
     return () => controlador.current?.abort();
   }, [actualizarClima]);
