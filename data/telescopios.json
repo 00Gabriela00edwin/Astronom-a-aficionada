@@ -1,5 +1,42 @@
 [
-  { "nombre": "Celestron AstroMaster 70AZ", "tipo": "Refractor" },
-  { "nombre": "SkyWatcher Dobson 200/1200", "tipo": "Reflector" },
-  { "nombre": "Meade LX90", "tipo": "Catadióptrico" }
+  {
+    "id": "celestron-70az",
+    "nombre": "Celestron AstroMaster 70AZ",
+    "tipo": "Refractor",
+    "aperturaMm": 70,
+    "distanciaFocalMm": 900,
+    "relacionFocal": "f/13",
+    "montura": "Altazimutal",
+    "idealPara": "Luna, planetas brillantes y observación terrestre"
+  },
+  {
+    "id": "skywatcher-dobson-200",
+    "nombre": "SkyWatcher Dobson 200/1200",
+    "tipo": "Reflector",
+    "aperturaMm": 200,
+    "distanciaFocalMm": 1200,
+    "relacionFocal": "f/6",
+    "montura": "Dobson",
+    "idealPara": "Cielo profundo, cúmulos, nebulosas y planetas"
+  },
+  {
+    "id": "meade-lx90",
+    "nombre": "Meade LX90 8\"",
+    "tipo": "Catadióptrico",
+    "aperturaMm": 203,
+    "distanciaFocalMm": 2000,
+    "relacionFocal": "f/10",
+    "montura": "Altazimutal GoTo",
+    "idealPara": "Astrofotografía planetaria, Luna y cielo profundo"
+  },
+  {
+    "id": "mak-127-eq",
+    "nombre": "Maksutov-Cassegrain 127/1500",
+    "tipo": "Catadióptrico",
+    "aperturaMm": 127,
+    "distanciaFocalMm": 1500,
+    "relacionFocal": "f/11.8",
+    "montura": "Ecuatorial",
+    "idealPara": "Detalle lunar, Saturno, Júpiter y estrellas dobles"
+  }
 ]

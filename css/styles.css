@@ -1,107 +1,306 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap');
+@import "tailwindcss";
 
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Orbitron', sans-serif;
-  background-color: #121212;
-  color: #e0e0e0;
+  --background: #05050a;
+  --text: #f0eef5;
+  --muted: #a4a2b3;
+  --accent: #ffc400;
+  --accent-soft: rgba(255, 196, 0, 0.1);
+  --accent-border: rgba(255, 196, 0, 0.25);
+  --border: rgba(255, 255, 255, 0.1);
+  --field: rgba(5, 5, 10, 0.55);
+  --header: rgba(5, 5, 10, 0.78);
+  --menu: #11111b;
+  --button-text: #0c0a04;
+  --glow: rgba(255, 196, 0, 0.08);
+  --ocular-background: #090b18;
+  --planet-base: #d8c29a;
+  --planet-detail: #9c8565;
+  --planet-ring: #baa688;
+  --planet-storm: #945e49;
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
   line-height: 1.6;
 }
 
-header {
-  background: linear-gradient(to right, #0f0f0f, #1c1c1c);
-  color: #fff;
-  padding: 1.5rem 2rem;
+body:has(.night-mode) {
+  --background: #000;
+  --text: #dd5555;
+  --muted: #a44444;
+  --accent: #ff2a2a;
+  --accent-soft: rgba(255, 42, 42, 0.08);
+  --accent-border: rgba(255, 42, 42, 0.24);
+  --border: rgba(255, 42, 42, 0.16);
+  --field: #090000;
+  --header: rgba(0, 0, 0, 0.94);
+  --menu: #100000;
+  --button-text: #160000;
+  --glow: rgba(255, 42, 42, 0.04);
+  --ocular-background: #080000;
+  --planet-base: #9c1a1a;
+  --planet-detail: #5e0b0b;
+  --planet-ring: #8a1717;
+  --planet-storm: #3e0505;
+}
+
+body {
+  background-image: radial-gradient(ellipse at 50% 0, var(--glow), transparent 38rem);
+}
+
+button, a, input, select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+section[id], #dashboard {
+  scroll-margin-top: 6rem;
+}
+
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  background: var(--header);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+}
+
+.header-inner {
+  width: min(100% - 3rem, 1200px);
+  min-height: 76px;
+  margin: auto;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #333;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+  gap: 1rem;
 }
 
-header h1 {
-  font-size: 2.2rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #f7c948;
-}
-
-nav ul.menu > li > a::after {
-  content: " ▼";
-  font-size: 0.7em;
-  margin-left: 0.3em;
-  color: #f7c948;
-}
-
-nav ul.menu {
-  list-style: none;
+.brand, .header-actions, .nav-link, .night-toggle, .mobile-menu-toggle {
   display: flex;
   align-items: center;
 }
 
-nav ul.menu > li {
-  position: relative;
-  margin-left: 1.5rem;
-}
-
-nav ul.menu a {
-  color: white;
+.brand {
+  gap: 0.75rem;
+  color: var(--text);
   text-decoration: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
 }
 
-nav ul.menu a:hover {
-  background-color: #292929;
+.brand-icon, .section-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.brand-text {
+  display: grid;
+  gap: 0.1rem;
+  font: 700 0.73rem/1.2 'Orbitron', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.brand-text small {
+  color: var(--muted);
+  font: 500 0.58rem/1.2 'Orbitron', sans-serif;
+  letter-spacing: 0.18em;
+}
+
+.header-actions {
+  gap: 1rem;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.nav-link {
+  gap: 0.45rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.nav-link:hover, .dropdown-menu a:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+.chevron.is-open {
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
-  display: none;
   position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #111;
-  padding: 0.8rem;
-  border-radius: 8px;
-  z-index: 10;
-  min-width: 200px;
-  box-shadow: 0 0 15px rgba(255,255,255,0.1);
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 230px;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--menu);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  list-style: none;
 }
 
-.dropdown:hover .dropdown-menu {
+.dropdown-menu a {
   display: block;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.night-toggle, .mobile-menu-toggle {
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 42px;
+  padding: 0.6rem 0.8rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.night-toggle:hover, .mobile-menu-toggle:hover {
+  border-color: var(--accent);
+}
+
+.toggle-indicator {
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.night-toggle[aria-pressed="true"] .toggle-indicator {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  width: 42px;
+  padding: 0;
 }
 
 main {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  width: min(100% - 3rem, 1200px);
+  margin: 0 auto;
+  padding-top: 6.25rem;
+}
+
+.glass-card {
+  min-width: 0;
+  padding: clamp(1.3rem, 3vw, 2rem);
+  border-radius: 20px;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.16);
+}
+
+.night-mode .glass-card {
+  background-color: rgba(255, 42, 42, 0.035);
+  border-color: var(--border);
+}
+
+.carousel, .dashboard, #climaAstronomico, #busqueda, #registro, #observaciones, #calculadoraAumentos, #catalogoTelescopios {
+  grid-column: 1 / -1;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  min-width: 0;
 }
 
 .carousel {
-  border: 2px solid #333;
-  border-radius: 12px;
+  position: relative;
+  height: clamp(450px, 53vw, 610px);
   overflow: hidden;
-  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  isolation: isolate;
 }
 
 .carousel-container {
   display: flex;
+  height: 100%;
   animation: scroll-carousel 20s linear infinite;
 }
 
 .carousel-container img {
   width: 100%;
+  height: 100%;
   flex-shrink: 0;
-  border-radius: 10px;
+  object-fit: cover;
+}
+
+.carousel::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(5, 5, 10, 0.95) 0%, rgba(5, 5, 10, 0.72) 52%, rgba(5, 5, 10, 0.38) 100%);
+  content: "";
+  pointer-events: none;
+}
+
+.night-mode .carousel-container img {
+  filter: grayscale(1) brightness(0.35);
+}
+
+.night-mode .carousel::after {
+  background: #ff2a2a;
+  mix-blend-mode: multiply;
+}
+
+.starfield {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 @keyframes scroll-carousel {
@@ -109,116 +308,658 @@ main {
   100% { transform: translateX(-300%); }
 }
 
-#reloj {
-  font-size: 1.4rem;
-  text-align: center;
-  margin: 2rem 0;
-  color: #f7c948;
+.carousel-content {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 720px;
+  padding: clamp(1.5rem, 5vw, 4rem);
 }
 
-section {
-  background-color: #1f1f1f;
-  padding: 2rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent);
+  font: 700 0.65rem/1.4 'DM Sans', sans-serif;
+  letter-spacing: 0.18em;
 }
 
-h2 {
-  color: #f7c948;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.carousel h1 {
+  margin: 1.2rem 0;
+  font: 700 clamp(2.4rem, 5vw, 4.7rem)/1.12 'Orbitron', sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.carousel h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.carousel-content p {
+  max-width: 470px;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
+}
+
+.hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+  padding: 0.9rem 1.2rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 0 24px var(--glow), inset 0 0 16px var(--accent-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-link:hover {
+  background: var(--field);
+  box-shadow: 0 0 30px var(--accent-soft), inset 0 0 20px var(--accent-soft);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+}
+
+.section-icon {
+  width: 46px;
+  height: 46px;
+}
+
+.section-heading h2 {
+  margin: 0.25rem 0 0;
+  color: var(--text);
+  font: 600 clamp(0.9rem, 2vw, 1.1rem)/1.3 'Orbitron', sans-serif;
+}
+
+#datosClima {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.weather-tile, .sky-tile, .moon-tile, .weather-message, .observacion {
+  padding: 0.9rem 1rem;
+  color: var(--text);
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.weather-tile {
+  grid-column: span 2;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1.2rem;
+}
+
+.weather-tile svg, .tile-label svg {
+  color: var(--accent);
+}
+
+.weather-tile span, .tile-label {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.weather-tile strong {
+  color: var(--text);
+  font: 600 clamp(1.05rem, 2vw, 1.35rem) 'Orbitron', sans-serif;
+}
+
+.sky-tile {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+
+.tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.08em;
+}
+
+.sky-tile strong, .moon-tile h3 {
+  color: var(--accent);
+  font: 600 1.1rem 'Orbitron', sans-serif;
+}
+
+.sky-tile p, .moon-tile p, .moon-tile small, .weather-time {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.moon-tile {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.moon-tile h3 {
+  margin: 0.6rem 0 0.4rem;
+}
+
+.moon-graphic {
+  width: clamp(64px, 7vw, 90px);
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 12px var(--glow));
+}
+
+.moon-shadow {
+  fill: var(--field);
+}
+
+.moon-light {
+  fill: var(--accent);
+  opacity: 0.8;
+}
+
+.moon-outline {
+  fill: none;
+  stroke: var(--accent-border);
+  stroke-width: 2;
+}
+
+.weather-message {
+  grid-column: span 3;
+}
+
+.weather-time {
+  grid-column: 1 / -1;
+}
+
+.observacion {
+  font-size: 0.88rem;
 }
 
 form label {
   display: block;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-input[type="text"], input[type="date"], input[type="time"] {
-  width: 100%;
-  padding: 0.7rem;
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 8px;
-}
-
-button {
-  background-color: #f7c948;
-  color: #000;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background-color: #e6b800;
-}
-button:disabled {
-  background-color: #888;
-  color: #222;
-  cursor: not-allowed;
-}
-
-.observacion {
-  background-color: #222;
-  padding: 1rem;
-  border: 1px solid #444;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.05);
-}
-
-aside {
-  background-color: #1a1a1a;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin: 2rem auto;
-  max-width: 800px;
-  border: 1px solid #333;
-  text-align: center;
-  color: #f7c948;
-}
-
-footer {
-  background-color: #0d0d0d;
-  color: #aaa;
-  text-align: center;
-  padding: 1rem;
-  border-top: 1px solid #333;
-  font-size: 0.9rem;
-}
-select {
-  width: 100%;
-  padding: 0.7rem;
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 input, select {
-  background-color: #2a2a2a;
-  border: 1px solid #555;
-  color: #fff;
-  padding: 0.7rem;
-  border-radius: 8px;
+  display: block;
+  width: 100%;
+  min-height: 45px;
+  margin-top: 0.4rem;
+  padding: 0.7rem 0.85rem;
+  color: var(--text);
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus, select:focus {
-  border-color: #f7c948;
-  box-shadow: 0 0 8px #f7c948;
-  background-color: #3a3a3a;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 18px var(--accent-soft);
+}
+
+body:has(.night-mode) input::-webkit-calendar-picker-indicator {
+  filter: invert(28%) sepia(100%) saturate(4000%) hue-rotate(340deg) brightness(0.7);
+}
+
+form button, .observacion button {
+  min-height: 44px;
+  padding: 0.7rem 1.2rem;
+  color: var(--button-text);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+form button:hover, .observacion button:hover {
+  filter: brightness(0.85);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#formBusqueda {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+#formBusqueda > div {
+  flex: 1 1 240px;
+  max-width: 360px;
+}
+
+form .secondary-button, .autofill-button {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+}
+
+.autofill-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.2rem;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 14px;
+}
+
+.autofill-panel strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.autofill-panel p, .autofill-error {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.autofill-error {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--accent);
+}
+
+.autofill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.autofill-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+#resultadoBusqueda:not(:empty) {
+  margin-top: 1.2rem;
+}
+
+#formObservacion {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+#formObservacion button {
+  justify-self: start;
+  align-self: end;
+}
+
+#listaObservaciones, #resultadoBusqueda {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+#listaObservaciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 0.75rem;
+}
+
+.empty-observations {
+  grid-column: 1 / -1;
+}
+
+.observacion + .observacion {
+  margin-top: 0.75rem;
+}
+
+.observation-card + .observation-card {
+  margin-top: 0;
+}
+
+.observacion p + p {
+  margin-top: 0.25rem;
+}
+
+.observacion strong {
+  color: var(--muted);
+}
+
+.observacion button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+
+#listaTelescopios {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+#listaTelescopios .observacion {
+  margin: 0;
+}
+
+#listaTelescopios strong {
+  color: var(--text);
+}
+
+.calculator-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.calculator-controls label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.eyepiece-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.eyepiece-heading strong {
+  color: var(--accent);
+  font: 600 0.9rem 'Orbitron', sans-serif;
+}
+
+#ocularCalculadora {
+  appearance: none;
+  width: 100%;
+  min-height: 0;
+  height: 6px;
+  margin: 1rem 0 0;
+  padding: 0;
+  background: var(--accent-border);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+#ocularCalculadora::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-border);
+}
+
+#ocularCalculadora::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-border);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.optics-results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.optics-results > div {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 0.7rem;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.optics-results span, .telescope-specs dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.optics-results strong {
+  color: var(--accent);
+  font: 600 clamp(0.85rem, 1.5vw, 1.1rem) 'Orbitron', sans-serif;
+}
+
+.optics-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+
+.optics-warning svg {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}
+
+.telescope-specs {
+  margin-top: 1.5rem;
+}
+
+.telescope-specs h3 {
+  margin-bottom: 0.7rem;
+  color: var(--text);
+  font: 600 0.85rem 'Orbitron', sans-serif;
+}
+
+.telescope-specs dl {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.telescope-specs dl > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 0.8rem;
+}
+
+.telescope-specs dd {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.calculator-message {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.eyepiece-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.4rem;
+  text-align: center;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.eyepiece-label {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.eyepiece-circle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 290px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: radial-gradient(circle, var(--glow), var(--ocular-background) 70%);
+  border: 3px solid var(--accent-border);
+  border-radius: 50%;
+  box-shadow: inset 0 0 35px var(--background), 0 0 20px var(--glow);
+}
+
+.celestial-object {
+  width: 88px;
+  height: 88px;
+  transition: transform 0.3s ease;
+}
+
+.celestial-object svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.celestial-base {
+  fill: var(--planet-base);
+}
+
+.celestial-detail, .jupiter-bands {
+  fill: var(--planet-detail);
+}
+
+.jupiter-storm {
+  fill: var(--planet-storm);
+}
+
+.saturn-ring, .saturn-ring-front, .planet-lines {
+  fill: none;
+  stroke: var(--planet-ring);
+}
+
+.saturn-ring, .saturn-ring-front {
+  stroke-width: 5;
+}
+
+.planet-lines {
+  stroke: var(--planet-detail);
+  stroke-width: 3;
+}
+
+.object-picker {
+  position: absolute;
+  bottom: 17%;
+  left: 50%;
+  display: flex;
+  gap: 0.2rem;
+  transform: translateX(-50%);
+}
+
+.object-picker button {
+  padding: 0.3rem 0.4rem;
+  color: var(--muted);
+  background: var(--menu);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.object-picker button[aria-pressed="true"], .object-picker button:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+.eyepiece-preview figcaption {
+  max-width: 300px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.quote-card {
+  width: min(100% - 3rem, 1200px);
+  margin: 1.25rem auto;
+  text-align: center;
+}
+
+.quote-card .eyebrow {
+  justify-content: center;
+}
+
+.quote {
+  max-width: 700px;
+  margin: 1rem auto;
+  color: var(--text);
+  font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+}
+
+.quote-card h2 {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+#reloj {
+  margin-top: 1.25rem;
+  color: var(--accent);
+  font: 500 0.9rem 'Orbitron', sans-serif;
+}
+
+footer {
+  padding: 1.5rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+footer span {
+  color: var(--accent);
 }
 
 ::-webkit-scrollbar {
@@ -226,51 +967,168 @@ input:focus, select:focus {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f7c948;
+  background: var(--accent);
   border-radius: 10px;
 }
 
-.swal2-popup.mi-alerta {
-  font-family: 'Orbitron', sans-serif;
-  background-color: #121212 !important;
-  border: 2px solid #f7c948;
-  color: #e0e0e0 !important;
-  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+.swal2-popup {
+  color: var(--text) !important;
+  background: var(--menu) !important;
+  border: 1px solid var(--accent-border);
+  border-radius: 20px !important;
+  font-family: 'DM Sans', sans-serif !important;
 }
 
-.swal2-title {
-   font-family: 'Orbitron', sans-serif;
-  background-color: #121212 !important;
-  border: 2px solid #f7c948;
-  color: #e0e0e0 !important;
-  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+.swal2-title, .swal2-html-container {
+  color: var(--text) !important;
 }
 
-.swal2-html-container {
-   font-family: 'Orbitron', sans-serif;
-  background-color: #121212 !important;
-  border: 2px solid #f7c948;
-  color: #e0e0e0 !important;
-  box-shadow: 0 0 15px rgba(247, 201, 72, 0.3);
+.swal2-confirm {
+  color: var(--button-text) !important;
+  background: var(--accent) !important;
 }
 
+.swal2-icon {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
 
-@media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    text-align: center;
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: var(--accent-border) !important;
+}
+
+.swal2-icon.swal2-success [class^="swal2-success-line"],
+.swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: var(--accent) !important;
+}
+
+@media (max-width: 720px) {
+  .header-inner {
+    width: min(100% - 2rem, 1200px);
+    min-height: 68px;
   }
 
-  nav ul.menu {
-    flex-direction: column;
-    align-items: center;
+  .header-actions {
+    gap: 0.5rem;
   }
 
-  nav ul.menu > li {
-    margin: 0.5rem 0;
+  .night-toggle span:not(.toggle-indicator) {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 1rem;
+    width: min(260px, calc(100vw - 2rem));
+    padding: 0.5rem;
+    background: var(--menu);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .main-nav.is-open {
+    display: block;
+  }
+
+  .nav-link {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .dropdown-menu {
+    position: static;
+    min-width: 0;
+    margin-top: 0.25rem;
+    box-shadow: none;
+  }
+
+  main {
+    width: min(100% - 2rem, 1200px);
+    grid-template-columns: 1fr;
+    padding-top: 5.25rem;
+  }
+
+  .carousel, .dashboard, #climaAstronomico, #busqueda, #registro, #observaciones, #calculadoraAumentos, #catalogoTelescopios {
+    grid-column: auto;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .calculator-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #listaTelescopios {
+    grid-template-columns: 1fr;
+  }
+
+  #datosClima {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .weather-tile {
+    grid-column: span 1;
+  }
+
+  .weather-tile:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .sky-tile, .moon-tile, .weather-message {
+    grid-column: 1 / -1;
+  }
+
+  .autofill-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quote-card {
+    width: min(100% - 2rem, 1200px);
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-text {
+    font-size: 0.65rem;
+  }
+
+  .brand-text small {
+    font-size: 0.52rem;
+  }
+
+  #formObservacion {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
+
+  .carousel-container {
+    animation: none;
+  }
+
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
   }
 }
