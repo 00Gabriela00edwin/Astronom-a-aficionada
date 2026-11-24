@@ -165,7 +165,7 @@ section[id], #dashboard {
   border-radius: 10px;
 }
 
-.nav-link:hover, .dropdown-menu a:hover {
+.dropdown-menu a:hover {
   color: var(--accent);
   background: var(--accent-soft);
 }
@@ -1634,7 +1634,7 @@ footer span {
   margin-top: 0.75rem;
 }
 
-/* Cursor: visor rojo de telescopio */
+/* Cursor: mira láser verde */
 .telescope-cursor {
   position: fixed;
   top: 0;
@@ -1645,14 +1645,14 @@ footer span {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s ease;
-  filter: drop-shadow(0 0 3px rgba(255, 42, 42, 0.7));
+  filter: drop-shadow(0 0 3px rgba(57, 255, 20, 0.7));
 }
 
 .telescope-cursor svg { display: block; overflow: visible; }
 .tc-escala { display: block; width: 28px; height: 28px; transition: transform 0.2s ease; }
 
-.tc-anillo, .tc-cruz { fill: none; stroke: #ff2a2a; stroke-width: 1.3; stroke-linecap: round; }
-.tc-punto { fill: #ff4d4d; }
+.tc-anillo, .tc-cruz { fill: none; stroke: #39ff14; stroke-width: 1.3; stroke-linecap: round; }
+.tc-punto { fill: #39ff14; }
 
 @media (pointer: fine) {
   html, body, body *, body *::before, body *::after {

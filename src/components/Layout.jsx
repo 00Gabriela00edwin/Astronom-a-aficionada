@@ -54,16 +54,19 @@ export function Header() {
         <div className="header-actions">
           <nav id="navegacion-principal" className={`main-nav${menuAbierto ? " is-open" : ""}`} aria-label="Navegación principal">
             <div className="dropdown">
-              <button
+              <FloatingButton
                 ref={botonGaleria}
-                type="button"
+                variant="subtle"
+                dot={false}
                 className="nav-link"
                 aria-expanded={galeriaAbierta}
                 aria-controls={galeriaAbierta ? "galeria-menu" : undefined}
                 onClick={() => setGaleriaAbierta((abierta) => !abierta)}
+                icon={<ChevronDown size={16} aria-hidden="true" className={galeriaAbierta ? "chevron is-open" : "chevron"} />}
+                iconPosition="end"
               >
-                Galería <ChevronDown size={16} aria-hidden="true" className={galeriaAbierta ? "chevron is-open" : "chevron"} />
-              </button>
+                Galería
+              </FloatingButton>
               <AnimatePresence>
                 {galeriaAbierta && (
                   <motion.ul

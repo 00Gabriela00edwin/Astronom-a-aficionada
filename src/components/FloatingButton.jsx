@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { playHoverTick } from "../utils/spaceAudio.js";
 
@@ -9,7 +9,7 @@ function limitar(valor, limite) {
   return Math.max(-limite, Math.min(limite, valor));
 }
 
-export default function FloatingButton({
+const FloatingButton = forwardRef(function FloatingButton({
   as: Etiqueta = "button",
   children,
   onClick,
@@ -22,7 +22,7 @@ export default function FloatingButton({
   disabled = false,
   delay,
   ...resto
-}) {
+}, forwardedRef) {
   const raiz = useRef(null);
   const cuerpo = useRef(null);
   const interior = useRef(null);
@@ -77,7 +77,11 @@ export default function FloatingButton({
 
   return (
     <Etiqueta
-      ref={raiz}
+      ref={(elemento) => {
+        raiz.current = elemento;
+        if (typeof forwardedRef === "function") forwardedRef(elemento);
+        else if (forwardedRef) forwardedRef.current = elemento;
+      }}
       className={clases}
       style={{ "--float-delay": `${retraso}s` }}
       onClick={onClick}
@@ -99,4 +103,6 @@ export default function FloatingButton({
       </span>
     </Etiqueta>
   );
-}
+});
+
+export default FloatingButton;
