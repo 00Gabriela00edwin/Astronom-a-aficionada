@@ -52,8 +52,8 @@ export default function CalculadoraAumentos({ telescopios, estadoCatalogo }) {
   const telescopio = telescopios.find((equipo) => equipo.id === idActual);
 
   return (
-    <section id="calculadoraAumentos" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={Orbit} eyebrow="SIMULA TU OBSERVACIÓN">Calculadora de Aumentos</SectionHeading>
+    <section id="calculadoraAumentos" className="hud-section">
+      <SectionHeading icon={Orbit} eyebrow="05 // ÓPTICA Y EQUIPOS">Calculadora de Aumentos</SectionHeading>
       {!telescopio ? (
         <p className="calculator-message" role={estadoCatalogo === "error" ? "alert" : "status"}>
           {estadoCatalogo === "cargando" ? "Cargando catálogo de telescopios..." : estadoCatalogo === "error" ? "No se pudo cargar el catálogo de telescopios." : "No hay telescopios disponibles."}

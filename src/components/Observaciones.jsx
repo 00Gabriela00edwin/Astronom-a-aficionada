@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DateTime } from "luxon";
-import { BookOpen, ClipboardList, CloudSun, Download, Search, Telescope, Trash2, Upload } from "lucide-react";
+import { BookOpen, ClipboardList, CloudSun, Download, Image, Search, Telescope, Trash2, Upload } from "lucide-react";
 import SectionHeading from "./SectionHeading.jsx";
+import FloatingButton from "./FloatingButton.jsx";
+import PostalCosmica from "./PostalCosmica.jsx";
 
 const formularioVacio = {
   hora: "",
@@ -14,7 +16,7 @@ const formularioVacio = {
   datosFoto: "",
 };
 
-function TarjetaObservacion({ observacion, onEliminar, movimientoReducido }) {
+function TarjetaObservacion({ observacion, onEliminar, onPostal, movimientoReducido }) {
   return (
     <motion.article
       className="observacion observation-card"
@@ -31,6 +33,9 @@ function TarjetaObservacion({ observacion, onEliminar, movimientoReducido }) {
       <p><strong>Telescopio:</strong> {observacion.telescopio}</p>
       <p><strong>Ocular:</strong> {observacion.ocular}</p>
       <p><strong>Datos Foto:</strong> {observacion.datosFoto}</p>
+      <button type="button" onClick={() => onPostal(observacion)}>
+        <Image size={16} aria-hidden="true" /> Postal
+      </button>
       <button type="button" onClick={() => onEliminar(observacion.id)}>
         <Trash2 size={16} aria-hidden="true" /> Eliminar
       </button>
@@ -52,8 +57,8 @@ export function Busqueda({ fechaFiltro, onBuscar, cantidad }) {
   }
 
   return (
-    <section id="busqueda" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={Search} eyebrow="EXPLORA TUS REGISTROS">Buscar por Fecha</SectionHeading>
+    <section id="busqueda" className="hud-section">
+      <SectionHeading icon={Search} eyebrow="03 // BITÁCORA">Buscar por Fecha</SectionHeading>
       <form id="formBusqueda" onSubmit={buscar}>
         <div>
           <label htmlFor="fechaBusqueda">Selecciona una fecha:</label>
@@ -72,6 +77,7 @@ export function Busqueda({ fechaFiltro, onBuscar, cantidad }) {
 export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima, cargandoClima, errorClima, ubicacion }) {
   const [formulario, setFormulario] = useState(formularioVacio);
   const [errorAutocompletar, setErrorAutocompletar] = useState(false);
+  const [postal, setPostal] = useState(null);
 
   function cambiarCampo(event) {
     const { name, value } = event.target;
@@ -94,20 +100,24 @@ export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima,
 
   function registrar(event) {
     event.preventDefault();
-    if (onRegistrar(formulario)) setFormulario(formularioVacio);
+    const nueva = onRegistrar(formulario);
+    if (nueva) {
+      setFormulario(formularioVacio);
+      setPostal(nueva);
+    }
   }
 
   return (
-    <section id="registro" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={BookOpen} eyebrow="TU DIARIO DEL CIELO">Registrar Observación</SectionHeading>
+    <section id="registro" className="hud-section">
+      <SectionHeading icon={BookOpen} eyebrow="03 // BITÁCORA">Registrar Observación</SectionHeading>
       <div className="autofill-panel">
         <div>
           <strong>Una instantánea de tu cielo</strong>
           <p>Hora local del dispositivo y clima actual de {ubicacion.nombre}. Puedes editar ambos campos.</p>
         </div>
-        <button type="button" className="autofill-button" onClick={autocompletar} disabled={cargandoClima}>
-          <CloudSun size={18} aria-hidden="true" /> {cargandoClima ? "Actualizando clima..." : "Autocompletar clima y hora actual"}
-        </button>
+        <FloatingButton variant="primary" icon={<CloudSun size={18} />} onClick={autocompletar} disabled={cargandoClima}>
+          {cargandoClima ? "Actualizando clima..." : "Autocompletar clima y hora actual"}
+        </FloatingButton>
       </div>
       {(errorAutocompletar || errorClima) && (
         <p className="autofill-error" role="alert">No se pudo obtener el clima. Reintenta o completa los campos manualmente.</p>
@@ -129,6 +139,7 @@ export function RegistroObservacion({ telescopios, onRegistrar, actualizarClima,
         <p><label>Datos fotográficos: <input type="text" id="datosFoto" name="datosFoto" value={formulario.datosFoto} onChange={cambiarCampo} required /></label></p>
         <button type="submit">Registrar</button>
       </form>
+      {postal && <PostalCosmica observacion={postal} onCerrar={() => setPostal(null)} />}
     </section>
   );
 }
@@ -137,6 +148,7 @@ export function ObservacionesRegistradas({ observaciones, todasObservaciones, fe
   const movimientoReducido = useReducedMotion();
   const [urlRespaldo, setUrlRespaldo] = useState(null);
   const [mensajeRespaldo, setMensajeRespaldo] = useState("");
+  const [postal, setPostal] = useState(null);
   const enlace = useRef(null);
 
   useEffect(() => {
@@ -172,22 +184,23 @@ export function ObservacionesRegistradas({ observaciones, todasObservaciones, fe
   }
 
   return (
-    <section id="observaciones" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={ClipboardList} eyebrow="TU BITÁCORA">Observaciones Registradas</SectionHeading>
+    <section id="observaciones" className="hud-section">
+      <SectionHeading icon={ClipboardList} eyebrow="03 // BITÁCORA">Observaciones Registradas</SectionHeading>
       <div className="backup-actions">
-        <button type="button" className="autofill-button" onClick={exportar} disabled={errorCarga}><Download size={16} aria-hidden="true" /> Exportar respaldo</button>
-        <label className="autofill-button backup-import">
-          <Upload size={16} aria-hidden="true" /> Importar respaldo
+        <FloatingButton variant="secondary" icon={<Download size={16} />} onClick={exportar} disabled={errorCarga}>Exportar respaldo</FloatingButton>
+        <FloatingButton as="label" variant="secondary" className="backup-import" icon={<Upload size={16} />}>
+          Importar respaldo
           <input type="file" accept="application/json,.json" onChange={importar} disabled={errorCarga} />
-        </label>
+        </FloatingButton>
         <a ref={enlace} href={urlRespaldo || undefined} download="observaciones-astronomia.json" hidden>Descargar respaldo</a>
       </div>
       <p className="helper-text">El respaldo incluye todas las observaciones, incluso si hay un filtro activo. Al importar se combinan sin reemplazar registros.</p>
       {mensajeRespaldo && <p className="helper-text" role="status">{mensajeRespaldo}</p>}
       <div id="listaObservaciones">
+        {postal && <PostalCosmica observacion={postal} onCerrar={() => setPostal(null)} />}
         <AnimatePresence initial={false}>
           {observaciones.map((observacion) => (
-            <TarjetaObservacion key={observacion.id} observacion={observacion} onEliminar={onEliminar} movimientoReducido={movimientoReducido} />
+            <TarjetaObservacion key={observacion.id} observacion={observacion} onEliminar={onEliminar} onPostal={setPostal} movimientoReducido={movimientoReducido} />
           ))}
         </AnimatePresence>
         {observaciones.length === 0 && (
@@ -200,8 +213,8 @@ export function ObservacionesRegistradas({ observaciones, todasObservaciones, fe
 
 export function CatalogoTelescopios({ telescopios }) {
   return (
-    <section id="catalogoTelescopios" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={Telescope} eyebrow="TU EQUIPO">Catálogo de Telescopios</SectionHeading>
+    <section id="catalogoTelescopios" className="hud-section">
+      <SectionHeading icon={Telescope} eyebrow="05 // ÓPTICA Y EQUIPOS">Catálogo de Telescopios</SectionHeading>
       <div id="listaTelescopios">
         {telescopios.map((telescopio) => (
           <div className="observacion" key={telescopio.id}>

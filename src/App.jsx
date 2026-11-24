@@ -1,15 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
-import { MotionConfig } from "framer-motion";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { MotionConfig, useReducedMotion } from "framer-motion";
 import "sweetalert2/dist/sweetalert2.min.css";
 import telescopiosUrl from "../data/telescopios.json?url";
 import { Aside, Footer, Header } from "./components/Layout.jsx";
 import Hero from "./components/Hero.jsx";
-import Clima from "./components/Clima.jsx";
-import CalculadoraAumentos from "./components/CalculadoraAumentos.jsx";
+const StarfieldBackground = lazy(() => import("./components/StarfieldBackground.jsx"));
+import FocusSection from "./components/FocusSection.jsx";
+import ConstellationNav from "./components/ConstellationNav.jsx";
+import RocketScrollbar from "./components/RocketScrollbar.jsx";
+import TelescopeCursor from "./components/TelescopeCursor.jsx";
+import { playWarp } from "./utils/spaceAudio.js";
+import FloatingButton from "./components/FloatingButton.jsx";
+const Clima = lazy(() => import("./components/Clima.jsx"));
+const CalculadoraAumentos = lazy(() => import("./components/CalculadoraAumentos.jsx"));
 import useClima from "./hooks/useClima.js";
 import Ubicacion from "./components/Ubicacion.jsx";
 import SectionHeading from "./components/SectionHeading.jsx";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Telescope } from "lucide-react";
+import TelescopeIntro from "./components/TelescopeIntro.jsx";
 import { combinarRespaldo } from "./utils/respaldo.js";
 import { Busqueda, CatalogoTelescopios, ObservacionesRegistradas, RegistroObservacion } from "./components/Observaciones.jsx";
 
@@ -54,6 +62,30 @@ export default function App() {
   const observacionesFiltradas = fechaFiltro
     ? observaciones.filter((observacion) => observacion.fecha === fechaFiltro)
     : observaciones;
+
+  const movimientoReducido = useReducedMotion();
+  const [isWarping, setIsWarping] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    if (!showIntro) return undefined;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [showIntro]);
+  const temporizadoresWarp = useRef([]);
+
+  function handleExplore() {
+    temporizadoresWarp.current.forEach(clearTimeout);
+    playWarp();
+    setIsWarping(true);
+    temporizadoresWarp.current = [
+      setTimeout(() => document.getElementById("ubicacion")?.scrollIntoView({ behavior: "smooth", block: "start" }), 450),
+      setTimeout(() => setIsWarping(false), 1100),
+    ];
+  }
+
+  useEffect(() => () => temporizadoresWarp.current.forEach(clearTimeout), []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -105,10 +137,16 @@ export default function App() {
       return false;
     }
 
-    const nuevaObservacion = { id: Date.now().toString(), ...formulario };
+    const nuevaObservacion = {
+      id: Date.now().toString(),
+      ...formulario,
+      lugar: ubicacion.nombre,
+      latitud: ubicacion.latitud,
+      longitud: ubicacion.longitud,
+    };
     if (!guardarObservaciones([...observaciones, nuevaObservacion])) return false;
-    mostrarAlerta("success", "¡Observación guardada!", "Tu registro fue exitoso.");
-    return true;
+    mostrarAlerta("success", "¡Observación guardada!", "Tu registro fue exitoso. Tu postal cósmica está lista.");
+    return nuevaObservacion;
   }
 
   function eliminarObservacion(id) {
@@ -144,32 +182,50 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
+      {showIntro && <TelescopeIntro onComplete={() => setShowIntro(false)} />}
+      {!showIntro && (
+        <button type="button" className="intro-replay" aria-label="Repetir la introducción del telescopio" title="Repetir introducción" onClick={() => setShowIntro(true)}>
+          <Telescope size={18} aria-hidden="true" />
+        </button>
+      )}
+      <Suspense fallback={null}>
+        <StarfieldBackground isWarping={isWarping} movimientoReducido={movimientoReducido} />
+      </Suspense>
       <Header />
       <main>
-        <Hero />
+        <Hero onExplore={handleExplore} />
         <div id="dashboard" className="dashboard">
-          <Ubicacion ubicacion={ubicacion} onCambiar={setUbicacion} />
-          <Clima clima={climaUbicacion} cargando={cargando} error={error} ubicacion={ubicacion} />
-          <Busqueda fechaFiltro={fechaFiltro} onBuscar={setFechaFiltro} cantidad={observacionesFiltradas.length} />
-          {cargaInicial.error && <p className="storage-warning" role="alert">No se pudieron leer las observaciones guardadas. Se desactivó la escritura para evitar sobrescribirlas.</p>}
-          <RegistroObservacion telescopios={telescopios} onRegistrar={registrarObservacion} actualizarClima={actualizarClima} cargandoClima={cargando} errorClima={error} ubicacion={ubicacion} />
-          <ObservacionesRegistradas observaciones={observacionesFiltradas} todasObservaciones={observaciones} fechaFiltro={fechaFiltro} onEliminar={eliminarObservacion} onImportar={importarObservaciones} errorCarga={cargaInicial.error} />
-          <section id="planificador" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-            <SectionHeading icon={CalendarDays} eyebrow="PREPARA TU NOCHE">Planificador de observación</SectionHeading>
-            <button type="button" className="autofill-button" aria-expanded={planificadorAbierto} onClick={alternarPlanificador}>
-              {planificadorAbierto ? "Cerrar planificador" : "Abrir planificador"}
-            </button>
-            {planificadorAbierto && (
-              errorPlanificador ? <p className="helper-text" role="alert">No se pudo cargar el planificador. Ciérralo y ábrelo para reintentar.</p>
-                : cargandoPlanificador || !Planificador ? <p className="helper-text" role="status">Cargando planificador…</p>
-                  : ubicacion.zona || climaUbicacion?.zona ? <Planificador ubicacion={ubicacion} zona={ubicacion.zona || climaUbicacion.zona} />
-                    : <p className="helper-text" role="status">Esperando la zona horaria de la ubicación. Si falla, reintenta la consulta del clima.</p>
-            )}
-          </section>
-          <CalculadoraAumentos telescopios={telescopios} estadoCatalogo={estadoCatalogo} />
-          <CatalogoTelescopios telescopios={telescopios} />
+          <FocusSection><Ubicacion ubicacion={ubicacion} onCambiar={setUbicacion} /></FocusSection>
+          <FocusSection id="clima"><Suspense fallback={null}><Clima clima={climaUbicacion} cargando={cargando} error={error} ubicacion={ubicacion} /></Suspense></FocusSection>
+          <FocusSection id="bitacora">
+            <Busqueda fechaFiltro={fechaFiltro} onBuscar={setFechaFiltro} cantidad={observacionesFiltradas.length} />
+            {cargaInicial.error && <p className="storage-warning" role="alert">No se pudieron leer las observaciones guardadas. Se desactivó la escritura para evitar sobrescribirlas.</p>}
+            <RegistroObservacion telescopios={telescopios} onRegistrar={registrarObservacion} actualizarClima={actualizarClima} cargandoClima={cargando} errorClima={error} ubicacion={ubicacion} />
+            <ObservacionesRegistradas observaciones={observacionesFiltradas} todasObservaciones={observaciones} fechaFiltro={fechaFiltro} onEliminar={eliminarObservacion} onImportar={importarObservaciones} errorCarga={cargaInicial.error} />
+          </FocusSection>
+          <FocusSection>
+            <section id="planificador" className="hud-section">
+              <SectionHeading icon={CalendarDays} eyebrow="04 // PLANIFICADOR">Planificador de observación</SectionHeading>
+              <FloatingButton variant="primary" aria-expanded={planificadorAbierto} onClick={alternarPlanificador}>
+                {planificadorAbierto ? "Cerrar planificador" : "Abrir planificador"}
+              </FloatingButton>
+              {planificadorAbierto && (
+                errorPlanificador ? <p className="helper-text" role="alert">No se pudo cargar el planificador. Ciérralo y ábrelo para reintentar.</p>
+                  : cargandoPlanificador || !Planificador ? <p className="helper-text" role="status">Cargando planificador…</p>
+                    : ubicacion.zona || climaUbicacion?.zona ? <Planificador ubicacion={ubicacion} zona={ubicacion.zona || climaUbicacion.zona} />
+                      : <p className="helper-text" role="status">Esperando la zona horaria de la ubicación. Si falla, reintenta la consulta del clima.</p>
+              )}
+            </section>
+          </FocusSection>
+          <FocusSection id="equipos">
+            <Suspense fallback={null}><CalculadoraAumentos telescopios={telescopios} estadoCatalogo={estadoCatalogo} /></Suspense>
+            <CatalogoTelescopios telescopios={telescopios} />
+          </FocusSection>
         </div>
       </main>
+      <ConstellationNav />
+      <RocketScrollbar />
+      <TelescopeCursor />
       <Aside />
       <Footer />
     </MotionConfig>

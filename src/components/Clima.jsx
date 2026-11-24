@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { CloudMoon, CloudRain, Cloud, Compass, Gauge, Moon, Thermometer, Wind } from "lucide-react";
 import { calcularFaseLunar, evaluarCielo } from "../utils/astronomia.js";
 import SectionHeading from "./SectionHeading.jsx";
+const Moon3D = lazy(() => import("./Moon3D.jsx"));
+import WindRadar from "./WindRadar.jsx";
+import { useModoNocturno } from "../ModoNocturno.jsx";
 
 function DatoClima({ icon: Icon, label, value }) {
   return (
@@ -13,7 +16,7 @@ function DatoClima({ icon: Icon, label, value }) {
   );
 }
 
-function FaseLunar({ zona }) {
+function FaseLunar({ zona, latitud }) {
   const [fecha, setFecha] = useState(() => new Date());
 
   useEffect(() => {
@@ -22,13 +25,7 @@ function FaseLunar({ zona }) {
   }, []);
 
   const fase = calcularFaseLunar(fecha);
-  const creciente = fase.progreso < 0.5;
-  const radio = Math.max(0.001, 40 * Math.abs(fase.coseno));
-  const ladoExterior = creciente ? 1 : 0;
-  const ladoTerminador = creciente
-    ? (fase.coseno >= 0 ? 0 : 1)
-    : (fase.coseno >= 0 ? 1 : 0);
-  const iluminado = `M 50 10 A 40 40 0 0 ${ladoExterior} 50 90 A ${radio} 40 0 0 ${ladoTerminador} 50 10 Z`;
+  const { modoNocturno } = useModoNocturno();
 
   return (
     <div className="moon-tile">
@@ -38,29 +35,50 @@ function FaseLunar({ zona }) {
         <p>Iluminación aproximada: {fase.iluminacion} %</p>
         <small>{fecha.toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric", ...(zona ? { timeZone: zona } : {}) })}</small>
       </div>
-      <svg viewBox="0 0 100 100" className="moon-graphic" role="img" aria-label={`${fase.nombre}, ${fase.iluminacion} % iluminada`}>
-        <circle cx="50" cy="50" r="40" className="moon-shadow" />
-        <path d={iluminado} className="moon-light" />
-        <circle cx="50" cy="50" r="40" className="moon-outline" />
-      </svg>
+      <figure className="moon-figure">
+        <Suspense fallback={<div className="moon-3d" aria-hidden="true" />}>
+          <Moon3D
+            phase={fase.progreso}
+            illumination={fase.iluminacion}
+            latitude={latitud}
+            isNightVision={modoNocturno}
+          />
+        </Suspense>
+        <figcaption>Arrastrá para explorar</figcaption>
+      </figure>
     </div>
   );
 }
 
 export default function Clima({ clima, cargando, error, ubicacion }) {
+  const { modoNocturno } = useModoNocturno();
+  const nubes = clima ? Math.min(Math.max(Number(clima.nubosidad) || 0, 0), 100) / 100 : 0;
   return (
-    <section id="climaAstronomico" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={CloudMoon} eyebrow="CONDICIONES DE OBSERVACIÓN">Clima Actual</SectionHeading>
+    <section id="climaAstronomico" className="hud-section">
+      <SectionHeading icon={CloudMoon} eyebrow="02 // ATMÓSFERA">Clima Actual</SectionHeading>
       <div id="datosClima">
         {error ? <p className="weather-message" role="alert">Error al obtener datos del clima. Puedes reintentar desde el formulario.</p>
           : clima ? (
             <>
               <DatoClima icon={Thermometer} label="Temperatura" value={`${clima.temperature} °C`} />
-              <DatoClima icon={Wind} label="Velocidad del viento" value={`${clima.windspeed} km/h`} />
-              <DatoClima icon={Compass} label="Dirección del viento" value={`${clima.winddirection}°`} />
               <DatoClima icon={Cloud} label="Nubosidad" value={`${clima.nubosidad} %`} />
               <DatoClima icon={CloudRain} label="Precipitación actual" value={`${clima.precipitacion} mm`} />
-              <div className="sky-tile">
+              <div className="wind-tile">
+                <WindRadar speed={clima.windspeed} direction={clima.winddirection} isNightVision={modoNocturno} />
+                <div className="wind-telemetry">
+                  <span className="tile-label"><Wind size={16} aria-hidden="true" /> VIENTO</span>
+                  <div>
+                    <span>Velocidad del viento</span>
+                    <strong>{clima.windspeed} km/h</strong>
+                  </div>
+                  <div>
+                    <span><Compass size={14} aria-hidden="true" /> Dirección del viento</span>
+                    <strong>{clima.winddirection}°</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="sky-tile" style={{ "--nubes": nubes }}>
+                <div className="sky-atmosphere" aria-hidden="true" />
                 <span className="tile-label"><Gauge size={16} aria-hidden="true" /> ESTADO DEL CIELO PARA OBSERVAR</span>
                 <strong>{evaluarCielo(clima.windspeed, clima.nubosidad, clima.precipitacion)}</strong>
                 <p>Estimación orientativa basada en viento, nubosidad y precipitación. No considera turbulencia atmosférica ni garantiza visibilidad.</p>
@@ -81,7 +99,7 @@ export default function Clima({ clima, cargando, error, ubicacion }) {
               </div>
             </>
           ) : <p className="weather-message" role="status">Cargando datos...</p>}
-        <FaseLunar zona={ubicacion.zona || clima?.zona} />
+        <FaseLunar zona={ubicacion.zona || clima?.zona} latitud={ubicacion.latitud} />
         {clima && !error && <p className="weather-time">{cargando ? "Actualizando medición…" : `Datos en ${ubicacion.nombre}: ${clima.time} (${clima.zona})`}</p>}
       </div>
     </section>

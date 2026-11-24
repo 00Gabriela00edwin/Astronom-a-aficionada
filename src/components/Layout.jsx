@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, Eye, Menu, Moon, Sparkles, X } from "lucide-react";
+import { ChevronDown, Eye, Menu, Moon, Volume2, VolumeX, X } from "lucide-react";
+import { getMuted, toggleMute } from "../utils/spaceAudio.js";
 import { DateTime } from "luxon";
 import { useModoNocturno } from "../ModoNocturno.jsx";
+import FloatingButton from "./FloatingButton.jsx";
 
 const enlacesGaleria = [
   { href: "#luna", texto: "Mis fotos de la Luna" },
@@ -15,6 +17,7 @@ export function Header() {
   const { modoNocturno, alternarModo } = useModoNocturno();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [galeriaAbierta, setGaleriaAbierta] = useState(false);
+  const [silenciado, setSilenciado] = useState(getMuted);
   const botonGaleria = useRef(null);
   const botonMenu = useRef(null);
   const movimientoReducido = useReducedMotion();
@@ -45,7 +48,6 @@ export function Header() {
     >
       <div className="header-inner">
         <a className="brand" href="#" aria-label="Astronomía Aficionada, inicio" onClick={cerrarMenus}>
-          <span className="brand-icon"><Sparkles size={20} aria-hidden="true" /></span>
           <span className="brand-text"><span>Astronomía</span><small>Aficionada</small></span>
         </a>
 
@@ -82,17 +84,27 @@ export function Header() {
               </AnimatePresence>
             </div>
           </nav>
-          <button
-            type="button"
+          <FloatingButton
+            variant="subtle"
+            dot={false}
             className="night-toggle"
             aria-label="Modo visión nocturna"
             aria-pressed={modoNocturno}
             onClick={alternarModo}
+            icon={modoNocturno ? <Eye size={18} /> : <Moon size={18} />}
           >
-            {modoNocturno ? <Eye size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
-            <span>Visión nocturna</span>
+            <span className="night-toggle-text">Visión nocturna</span>
             <span className="toggle-indicator" aria-hidden="true" />
-          </button>
+          </FloatingButton>
+          <FloatingButton
+            variant="subtle"
+            dot={false}
+            className="sound-toggle"
+            aria-label={silenciado ? "Activar sonido" : "Silenciar sonido"}
+            aria-pressed={!silenciado}
+            onClick={() => setSilenciado(toggleMute())}
+            icon={silenciado ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          />
           <button
             ref={botonMenu}
             type="button"
@@ -124,7 +136,7 @@ export function Aside() {
   }, []);
 
   return (
-    <aside className="quote-card glass-card bg-white/5 backdrop-blur-md border border-white/10">
+    <aside className="quote-card hud-section">
       <span className="eyebrow">UNA MIRADA AL COSMOS</span>
       <p className="quote">"En algún lugar, algo increíble está esperando a ser descubierto."</p>
       <h2>Carl Sagan</h2>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { LocateFixed, MapPin, Search } from "lucide-react";
 import { DateTime } from "luxon";
 import SectionHeading from "./SectionHeading.jsx";
+import FloatingButton from "./FloatingButton.jsx";
 
 export default function Ubicacion({ ubicacion, onCambiar }) {
   const [ciudad, setCiudad] = useState("");
@@ -94,16 +95,16 @@ export default function Ubicacion({ ubicacion, onCambiar }) {
   }
 
   return (
-    <section id="ubicacion" className="glass-card bg-white/5 backdrop-blur-md border border-white/10">
-      <SectionHeading icon={MapPin} eyebrow="TU LUGAR DE OBSERVACIÓN">Ubicación</SectionHeading>
+    <section id="ubicacion" className="hud-section">
+      <SectionHeading icon={MapPin} eyebrow="01 // UBICACIÓN">Tu lugar de observación</SectionHeading>
       <p className="helper-text">Actual: <strong>{ubicacion.nombre}</strong>. Se usa para el clima y el planificador.</p>
       <form className="location-form" onSubmit={buscar}>
         <div>
           <label htmlFor="ciudad">Buscar ciudad</label>
           <input id="ciudad" value={ciudad} onChange={(event) => setCiudad(event.target.value)} placeholder="Ej. Córdoba" />
         </div>
-        <button type="submit" disabled={buscando}><Search size={16} aria-hidden="true" /> {buscando ? "Buscando…" : "Buscar"}</button>
-        <button type="button" className="secondary-button" onClick={usarUbicacion}><LocateFixed size={16} aria-hidden="true" /> Usar mi ubicación</button>
+        <FloatingButton type="submit" variant="primary" icon={<Search size={16} />} disabled={buscando}>{buscando ? "Buscando…" : "Buscar"}</FloatingButton>
+        <FloatingButton variant="secondary" icon={<LocateFixed size={16} />} onClick={usarUbicacion}>Usar mi ubicación</FloatingButton>
       </form>
       <p className="helper-text">Buscar envía la ciudad a Open-Meteo. Al usar tu ubicación, el navegador pedirá permiso y las coordenadas se enviarán a Open-Meteo para consultar el clima.</p>
       {mensaje && <p className="helper-text" role="status">{mensaje}</p>}
