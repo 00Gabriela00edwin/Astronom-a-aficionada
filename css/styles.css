@@ -1793,7 +1793,7 @@ body:has(.night-mode) .rs-linea {
   inset: 0;
   z-index: 9999;
   overflow: hidden;
-  color: var(--accent);
+  color: #39ff14;
   cursor: crosshair;
   outline: none;
   touch-action: manipulation;
