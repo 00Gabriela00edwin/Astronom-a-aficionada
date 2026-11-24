@@ -4,7 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const DESENFOCADO = { opacity: 0.45, scale: 0.98 };
+const DESENFOCADO = { opacity: 0.84, scale: 0.995 };
 
 export default function FocusSection({ id, children }) {
   const raiz = useRef(null);
@@ -15,7 +15,7 @@ export default function FocusSection({ id, children }) {
     if (reducido) return undefined;
 
     const sinBlur = window.matchMedia("(max-width: 720px)").matches;
-    const desenfocado = { ...DESENFOCADO, ...(sinBlur ? {} : { filter: "blur(3px)" }) };
+    const desenfocado = { ...DESENFOCADO, ...(sinBlur ? {} : { filter: "blur(1px)" }) };
 
     const enfocar = () => gsap.to(elemento, {
       opacity: 1,
