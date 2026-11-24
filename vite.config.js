@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig({
-  base: "./",
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/Astronom-a-aficionada/" : "/",
   plugins: [tailwindcss()],
   build: {
     rollupOptions: {
@@ -19,4 +19,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
