@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
-  base: command === "build" ? "/Astronom-a-aficionada/" : "/",
+  base: command === "build" && !process.env.VERCEL ? "/Astronom-a-aficionada/" : "/",
   plugins: [tailwindcss()],
   build: {
     rollupOptions: {
