@@ -1,5 +1,21 @@
-import { Body, Observer, SearchRiseSet } from "astronomy-engine";
+import { Body, Equator, Horizon, Observer, SearchRiseSet } from "astronomy-engine";
 import { DateTime } from "luxon";
+
+export function filtrarHorasNocturnas(pronostico, latitud, longitud) {
+  if (!Array.isArray(pronostico) ||
+      !Number.isFinite(latitud) || latitud < -90 || latitud > 90 ||
+      !Number.isFinite(longitud) || longitud < -180 || longitud > 180 ||
+      pronostico.some((hora) => !Number.isFinite(hora?.hora))) {
+    throw new TypeError("Pronóstico o coordenadas inválidas.");
+  }
+
+  const observador = new Observer(latitud, longitud, 0);
+  return pronostico.filter(({ hora }) => {
+    const instante = new Date(hora * 1000);
+    const ecuador = Equator(Body.Sun, instante, observador, true, true);
+    return Horizon(instante, observador, ecuador.ra, ecuador.dec).altitude <= -18;
+  });
+}
 
 const ASTROS = [
   ["Sol", Body.Sun],

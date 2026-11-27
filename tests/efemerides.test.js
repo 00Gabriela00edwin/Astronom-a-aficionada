@@ -1,6 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularSalidasPuestas } from "../src/utils/efemerides.js";
+import { calcularSalidasPuestas, filtrarHorasNocturnas } from "../src/utils/efemerides.js";
+
+test("filtra horas fuera de la noche astronómica", () => {
+  const pronostico = [
+    { hora: Date.parse("2024-03-20T01:00:00Z") / 1000 },
+    { hora: Date.parse("2024-03-20T12:00:00Z") / 1000 },
+    { hora: Date.parse("2024-03-20T23:00:00Z") / 1000 },
+  ];
+  assert.deepEqual(
+    filtrarHorasNocturnas(pronostico, 0, 0).map(({ hora }) => hora),
+    [pronostico[0].hora, pronostico[2].hora],
+  );
+  const solsticioPolar = [
+    { hora: Date.parse("2024-06-21T00:00:00Z") / 1000 },
+    { hora: Date.parse("2024-06-21T12:00:00Z") / 1000 },
+  ];
+  assert.deepEqual(filtrarHorasNocturnas(solsticioPolar, 78.22, 15.65), []);
+  assert.deepEqual(filtrarHorasNocturnas([], 0, 0), []);
+  assert.throws(() => filtrarHorasNocturnas(pronostico, 91, 0), TypeError);
+});
 
 test("calcula salidas y puestas en la zona local e informa ausencia de eventos", () => {
   const greenwich = calcularSalidasPuestas("2024-03-20", "Europe/London", 51.48, 0);

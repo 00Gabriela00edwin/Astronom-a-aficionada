@@ -18,10 +18,10 @@ export default function useClima(ubicacion) {
       const params = new URLSearchParams({
         latitude: String(ubicacion.latitud),
         longitude: String(ubicacion.longitud),
-        current: "temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation",
-        hourly: "cloud_cover,precipitation_probability,precipitation,wind_speed_10m",
+        current: "temperature_2m,relative_humidity_2m,dew_point_2m,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation",
+        hourly: "temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,precipitation_probability,precipitation,wind_speed_10m",
         wind_speed_unit: "kmh",
-        forecast_days: "2",
+        forecast_days: "3",
         timezone: "auto",
         timeformat: "unixtime",
       });
